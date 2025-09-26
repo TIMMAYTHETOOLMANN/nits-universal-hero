@@ -161,3 +161,25 @@
   color: oklch(0.6 0.25 25);
   background: oklch(0.6 0.25 25 / 0.1);
 }
+
+/* Autonomous training interface styles */
+.auto-training-active {
+  background: linear-gradient(135deg, 
+    oklch(0.65 0.3 300 / 0.1), 
+    oklch(0.75 0.25 145 / 0.1)
+  );
+  border: 1px solid oklch(0.65 0.3 300 / 0.3);
+}
+
+.training-progress-glow {
+  box-shadow: 0 0 20px oklch(0.65 0.3 300 / 0.4);
+}
+
+.auto-pattern-badge {
+  background: linear-gradient(135deg, 
+    oklch(0.65 0.3 300 / 0.2), 
+    oklch(0.75 0.25 145 / 0.2)
+  );
+  border: 1px solid oklch(0.65 0.3 300 / 0.5);
+  color: oklch(0.65 0.3 300);
+}

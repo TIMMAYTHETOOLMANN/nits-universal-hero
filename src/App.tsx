@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Upload, FileText, Shield, Warning, Download, CaretDown, Activity, Brain, Plus, Trash, Eye, Gear, Target, Flask } from '@phosphor-icons/react'
+import { Upload, FileText, Shield, Warning, Download, CaretDown, Activity, Brain, Plus, Trash, Eye, Gear, Target, Flask, Robot, Play, Pause } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 // Spark API global declaration
@@ -123,11 +123,201 @@ function App() {
   })
   const [trainingData, setTrainingData] = useState<TrainingData[]>([])
   const [testingPattern, setTestingPattern] = useState<string | null>(null)
+  const [autoTrainingEnabled, setAutoTrainingEnabled] = useKV<boolean>('auto-training-enabled', false)
+  const [trainingInProgress, setTrainingInProgress] = useState(false)
+  const [trainingLog, setTrainingLog] = useState<string[]>([])
+  const [lastAutoTraining, setLastAutoTraining] = useKV<string | null>('last-auto-training', null)
 
   const addToConsole = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString()
     setConsoleLog(prev => [...prev, `[${timestamp}] ${message}`])
   }, [])
+
+  const addToTrainingLog = useCallback((message: string) => {
+    const timestamp = new Date().toLocaleTimeString()
+    setTrainingLog(prev => [...prev, `[${timestamp}] ${message}`])
+    addToConsole(`[AUTO-TRAINING] ${message}`)
+  }, [addToConsole])
+
+  const generateAutonomousPatterns = async (analysisResults: AnalysisResult): Promise<CustomPattern[]> => {
+    try {
+      addToTrainingLog('Analyzing results for autonomous pattern generation...')
+      
+      const patternPrompt = spark.llmPrompt`
+        Based on this forensic analysis, generate new custom patterns that could improve detection accuracy:
+
+        Analysis Results:
+        - Risk Score: ${analysisResults.summary.riskScore}/10
+        - Anomalies Found: ${analysisResults.anomalies.length}
+        - Key Anomalies: ${analysisResults.anomalies.map(a => `${a.type}: ${a.description}`).join('; ')}
+        - NLP Insights: ${JSON.stringify(analysisResults.nlpSummary)}
+        - Existing Custom Patterns: ${(customPatterns || []).length}
+        
+        Generate 2-3 new forensic patterns that would have improved detection of the found anomalies or filled gaps in coverage.
+        
+        Return JSON with this structure:
+        {
+          "patterns": [
+            {
+              "name": "pattern name",
+              "description": "detailed description of what it detects",
+              "category": "insider-trading|esg-greenwashing|financial-engineering|disclosure-gap|litigation-risk|temporal-anomaly|custom",
+              "keywords": ["keyword1", "keyword2", "keyword3"],
+              "rules": ["rule1", "rule2"],
+              "severity": "low|medium|high|critical",
+              "confidence": 0.7,
+              "reasoning": "why this pattern would improve detection"
+            }
+          ],
+          "trainingStrategy": "overall strategy for autonomous training",
+          "expectedImprovements": ["improvement1", "improvement2"]
+        }
+      `
+
+      const patternResult = await spark.llm(patternPrompt, 'gpt-4o', true)
+      const patternData = JSON.parse(patternResult)
+      
+      const newPatterns: CustomPattern[] = patternData.patterns.map((p: any) => ({
+        id: `auto_pattern_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: `[AUTO] ${p.name}`,
+        description: `${p.description}\n\nAuto-generated based on analysis results. Reasoning: ${p.reasoning}`,
+        category: p.category || 'custom',
+        keywords: p.keywords || [],
+        rules: p.rules || [],
+        severity: p.severity || 'medium',
+        confidence: p.confidence || 0.7,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        lastTested: null,
+        testResults: {
+          totalTests: 0,
+          successRate: 0,
+          falsePositives: 0,
+          lastTestDate: null
+        }
+      }))
+
+      addToTrainingLog(`Generated ${newPatterns.length} autonomous patterns based on analysis insights`)
+      return newPatterns
+      
+    } catch (error) {
+      addToTrainingLog('Failed to generate autonomous patterns - using fallback logic')
+      return []
+    }
+  }
+
+  const optimizeExistingPatterns = async (): Promise<void> => {
+    const testablePatterns = (customPatterns || []).filter(p => p.testResults.totalTests > 0)
+    if (testablePatterns.length === 0) return
+
+    addToTrainingLog(`Optimizing ${testablePatterns.length} existing patterns...`)
+
+    for (const pattern of testablePatterns) {
+      if (pattern.testResults.successRate < 70) {
+        try {
+          const optimizationPrompt = spark.llmPrompt`
+            This forensic pattern has ${pattern.testResults.successRate}% success rate and needs optimization:
+            
+            Pattern: ${pattern.name}
+            Description: ${pattern.description}
+            Keywords: ${pattern.keywords.join(', ')}
+            Rules: ${pattern.rules.join('; ')}
+            False Positives: ${pattern.testResults.falsePositives}
+            
+            Suggest improvements to increase accuracy and reduce false positives.
+            
+            Return JSON with this structure:
+            {
+              "improvedKeywords": ["better", "keywords"],
+              "improvedRules": ["refined rules"],
+              "adjustedConfidence": 0.8,
+              "optimizationNotes": "explanation of changes"
+            }
+          `
+
+          const optimizationResult = await spark.llm(optimizationPrompt, 'gpt-4o', true)
+          const optimization = JSON.parse(optimizationResult)
+
+          // Update the pattern with optimizations
+          setCustomPatterns(prev => 
+            (prev || []).map(p => 
+              p.id === pattern.id ? {
+                ...p,
+                keywords: optimization.improvedKeywords || p.keywords,
+                rules: optimization.improvedRules || p.rules,
+                confidence: optimization.adjustedConfidence || p.confidence,
+                description: `${p.description}\n\n[AUTO-OPTIMIZED] ${optimization.optimizationNotes}`
+              } : p
+            )
+          )
+
+          addToTrainingLog(`Optimized pattern: ${pattern.name}`)
+          
+        } catch (error) {
+          addToTrainingLog(`Failed to optimize pattern: ${pattern.name}`)
+        }
+      }
+    }
+  }
+
+  const performAutonomousTraining = async (analysisResults?: AnalysisResult) => {
+    if (trainingInProgress) return
+    
+    setTrainingInProgress(true)
+    addToTrainingLog('Starting autonomous pattern training session...')
+
+    try {
+      // Step 1: Generate new patterns based on analysis results
+      if (analysisResults) {
+        const newPatterns = await generateAutonomousPatterns(analysisResults)
+        if (newPatterns.length > 0) {
+          setCustomPatterns(prev => [...(prev || []), ...newPatterns])
+          addToTrainingLog(`Added ${newPatterns.length} new autonomous patterns`)
+        }
+      }
+
+      // Step 2: Optimize existing underperforming patterns
+      await optimizeExistingPatterns()
+
+      // Step 3: Test newly created patterns
+      const untestablePatterns = (customPatterns || []).filter(p => 
+        p.name.startsWith('[AUTO]') && p.testResults.totalTests === 0
+      )
+
+      for (const pattern of untestablePatterns.slice(0, 3)) { // Test max 3 at a time
+        await testPattern(pattern.id)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Rate limiting
+      }
+
+      // Step 4: Evaluate overall pattern ecosystem health
+      const totalPatterns = (customPatterns || []).length
+      const activePatterns = (customPatterns || []).filter(p => p.isActive).length
+      const testedPatterns = (customPatterns || []).filter(p => p.testResults.totalTests > 0).length
+      const highPerformingPatterns = (customPatterns || []).filter(p => p.testResults.successRate > 70).length
+
+      addToTrainingLog(`Training complete: ${totalPatterns} total, ${activePatterns} active, ${testedPatterns} tested, ${highPerformingPatterns} high-performing`)
+      
+      setLastAutoTraining(new Date().toISOString())
+      toast.success('Autonomous pattern training completed successfully')
+      
+    } catch (error) {
+      addToTrainingLog('Autonomous training failed - manual intervention may be required')
+      toast.error('Autonomous training encountered errors')
+    } finally {
+      setTrainingInProgress(false)
+    }
+  }
+
+  const scheduleAutonomousTraining = async (analysisResults: AnalysisResult) => {
+    if (!autoTrainingEnabled) return
+    
+    addToTrainingLog('Analysis complete - scheduling autonomous training...')
+    
+    // Run training in background after a short delay
+    setTimeout(() => {
+      performAutonomousTraining(analysisResults)
+    }, 2000)
+  }
 
   const validateFile = (file: File): boolean => {
     const extension = '.' + file.name.split('.').pop()?.toLowerCase()
@@ -600,6 +790,11 @@ function App() {
     setIsAnalyzing(false)
     addToConsole(`Advanced AI analysis complete - ${nlpPatterns + customPatternResults} patterns detected (${customPatternResults} custom)`)
     toast.success('AI-powered analysis complete with custom pattern integration')
+    
+    // Trigger autonomous training if enabled
+    if (autoTrainingEnabled) {
+      scheduleAutonomousTraining(mockResults)
+    }
   }
 
   const exportData = (format: 'txt' | 'csv' | 'json' | 'complete') => {
@@ -722,6 +917,10 @@ ${results.recommendations.map(r => `- ${r}`).join('\n')}`
             <span>NLP Active</span>
           </div>
           <div className="flex items-center gap-2">
+            <Robot size={16} className={autoTrainingEnabled ? "text-accent" : "text-muted-foreground"} />
+            <span>Auto-Training: {autoTrainingEnabled ? 'ON' : 'OFF'}</span>
+          </div>
+          <div className="flex items-center gap-2">
             <Target size={16} />
             <span>Custom Patterns: {(customPatterns || []).filter(p => p.isActive).length}</span>
           </div>
@@ -741,8 +940,13 @@ ${results.recommendations.map(r => `- ${r}`).join('\n')}`
             Document Analysis
           </TabsTrigger>
           <TabsTrigger value="patterns" className="flex items-center gap-2">
-            <Target size={16} />
-            Pattern Training
+            <div className="flex items-center gap-2">
+              <Target size={16} />
+              Pattern Training
+              {autoTrainingEnabled && (
+                <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+              )}
+            </div>
           </TabsTrigger>
           <TabsTrigger value="results" className="flex items-center gap-2" disabled={!results}>
             <Eye size={16} />
@@ -928,6 +1132,128 @@ ${results.recommendations.map(r => `- ${r}`).join('\n')}`
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Pattern Creation */}
             <div className="xl:col-span-2 space-y-6">
+              {/* Autonomous Training Control */}
+              <Card className="border-accent/30">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Robot size={20} className="text-accent" />
+                    Autonomous Pattern Training
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Brain size={16} className="text-accent" />
+                        <span className="font-medium">Auto-Training Status:</span>
+                      </div>
+                      <Badge variant={autoTrainingEnabled ? "default" : "secondary"} className="flex items-center gap-1">
+                        {autoTrainingEnabled ? (
+                          <>
+                            <Activity size={12} />
+                            ACTIVE
+                          </>
+                        ) : (
+                          <>
+                            <Pause size={12} />
+                            INACTIVE
+                          </>
+                        )}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant={autoTrainingEnabled ? "destructive" : "default"}
+                      size="sm"
+                      onClick={() => setAutoTrainingEnabled(prev => !prev)}
+                      className="min-w-24"
+                    >
+                      {autoTrainingEnabled ? (
+                        <>
+                          <Pause size={16} className="mr-1" />
+                          Disable
+                        </>
+                      ) : (
+                        <>
+                          <Play size={16} className="mr-1" />
+                          Enable
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <div className="text-muted-foreground">Last Training:</div>
+                      <div className="font-medium">
+                        {lastAutoTraining ? 
+                          new Date(lastAutoTraining).toLocaleString() : 
+                          'Never'
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Training Status:</div>
+                      <div className={`font-medium ${trainingInProgress ? 'text-accent' : 'text-muted-foreground'}`}>
+                        {trainingInProgress ? 'In Progress...' : 'Idle'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground">Auto Patterns:</div>
+                      <div className="font-medium text-primary">
+                        {(customPatterns || []).filter(p => p.name.startsWith('[AUTO]')).length}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => performAutonomousTraining(results || undefined)}
+                      disabled={trainingInProgress}
+                      className="flex-1"
+                    >
+                      {trainingInProgress ? (
+                        <>
+                          <Gear className="animate-spin mr-2" size={16} />
+                          Training...
+                        </>
+                      ) : (
+                        <>
+                          <Robot size={16} className="mr-2" />
+                          Run Training Now
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {autoTrainingEnabled && (
+                    <div className="p-3 bg-accent/10 border border-accent/20 rounded-lg text-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain size={16} className="text-accent" />
+                        <span className="font-medium text-accent">Autonomous Mode Active</span>
+                      </div>
+                      <p className="text-muted-foreground">
+                        System will automatically generate new patterns based on analysis results, 
+                        optimize underperforming patterns, and continuously improve detection accuracy.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Training Log */}
+                  {trainingLog.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Training Log</label>
+                      <div className="console-output p-3 rounded h-32 overflow-y-auto text-xs">
+                        {trainingLog.slice(-10).map((log, i) => (
+                          <div key={i} className="text-accent">{log}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1119,7 +1445,15 @@ ${results.recommendations.map(r => `- ${r}`).join('\n')}`
                       {(customPatterns || []).map((pattern) => (
                         <div key={pattern.id} className="border rounded-lg p-3 space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="font-medium text-sm">{pattern.name}</div>
+                            <div className="font-medium text-sm flex items-center gap-2">
+                              {pattern.name}
+                              {pattern.name.startsWith('[AUTO]') && (
+                                <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/30">
+                                  <Robot size={10} className="mr-1" />
+                                  AUTO
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
