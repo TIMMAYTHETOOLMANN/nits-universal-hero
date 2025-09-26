@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -187,12 +187,12 @@ function App() {
   const [secPenaltyData, setSecPenaltyData] = useKV<Record<string, SEC_Penalty_Data>>('sec-penalty-data', {})
   const [lastSecUpdate, setLastSecUpdate] = useKV<string | null>('last-sec-update', null)
 
-  // Initialize SEC penalty data on first load
-  useState(() => {
+  // Initialize SEC penalty data on first load using useEffect
+  useEffect(() => {
     if (Object.keys(secPenaltyData || {}).length === 0 && !lastSecUpdate) {
       parseSecPenaltyData()
     }
-  })
+  }, [secPenaltyData, lastSecUpdate])
 
   const addToConsole = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString()
