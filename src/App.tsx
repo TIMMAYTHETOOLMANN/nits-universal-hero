@@ -201,6 +201,8 @@ function App() {
     }
     addToConsole(`Cleared ${type} files`)
   }
+
+  const createCustomPattern = () => {
     if (!newPattern.name || !newPattern.description) {
       toast.error('Pattern name and description are required')
       return
@@ -354,65 +356,6 @@ function App() {
       ...prev,
       rules: (prev.rules || []).filter(r => r !== rule)
     }))
-  }
-
-  const validateFile = (file: File): boolean => {
-    const extension = '.' + file.name.split('.').pop()?.toLowerCase()
-    if (!SUPPORTED_FORMATS.includes(extension)) {
-      toast.error(`Unsupported file format: ${extension}`)
-      return false
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(`File too large: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB)`)
-      return false
-    }
-    return true
-  }
-
-  const handleFileUpload = (files: FileList | null, type: 'sec' | 'glamour') => {
-    if (!files || files.length === 0) return
-    
-    const validFiles: FileItem[] = []
-    
-    Array.from(files).forEach(file => {
-      if (validateFile(file)) {
-        validFiles.push({
-          name: file.name,
-          size: file.size,
-          type: file.type
-        })
-      }
-    })
-
-    if (validFiles.length > 0) {
-      if (type === 'sec') {
-        setSecFiles(prev => [...(prev || []), ...validFiles])
-      } else {
-        setGlamourFiles(prev => [...(prev || []), ...validFiles])
-      }
-      
-      addToConsole(`Uploaded ${validFiles.length} files to ${type.toUpperCase()} zone`)
-      toast.success(`Added ${validFiles.length} files to ${type.toUpperCase()} zone`)
-    }
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.currentTarget.classList.add('drag-over')
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.currentTarget.classList.remove('drag-over')
-  }
-
-  const handleDrop = (e: React.DragEvent, type: 'sec' | 'glamour') => {
-    e.preventDefault()
-    e.currentTarget.classList.remove('drag-over')
-    
-    if (e.dataTransfer?.files) {
-      handleFileUpload(e.dataTransfer.files, type)
-    }
   }
 
   const performNLPAnalysis = async (documentContext: string): Promise<any> => {
@@ -738,20 +681,6 @@ ${results.recommendations.map(r => `- ${r}`).join('\n')}`
     
     addToConsole(`Exported ${filename}`)
     toast.success(`Downloaded ${filename}`)
-  }
-
-  const clearFiles = (type: 'sec' | 'glamour' | 'all') => {
-    if (type === 'sec' || type === 'all') {
-      setSecFiles([])
-    }
-    if (type === 'glamour' || type === 'all') {
-      setGlamourFiles([])
-    }
-    if (type === 'all') {
-      setResults(null)
-      setConsoleLog([])
-    }
-    addToConsole(`Cleared ${type} files`)
   }
 
   const getRiskColor = (score: number) => {
