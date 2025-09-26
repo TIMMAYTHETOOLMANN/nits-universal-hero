@@ -183,3 +183,58 @@
   border: 1px solid oklch(0.65 0.3 300 / 0.5);
   color: oklch(0.65 0.3 300);
 }
+
+/* Enhanced download feedback styles */
+.download-card {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.9), 
+    oklch(0.12 0.02 240 / 0.9)
+  );
+  border: 1px solid oklch(0.2 0.05 240);
+}
+
+.download-success {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.1), 
+    oklch(0.75 0.25 145 / 0.05)
+  );
+  border: 1px solid oklch(0.75 0.25 145 / 0.3);
+}
+
+.download-button {
+  transition: all 0.3s ease;
+}
+
+.download-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px oklch(0.75 0.25 145 / 0.2);
+}
+
+.download-instructions {
+  background: linear-gradient(135deg, 
+    oklch(0.65 0.3 300 / 0.1), 
+    oklch(0.65 0.3 300 / 0.05)
+  );
+  border: 1px solid oklch(0.65 0.3 300 / 0.2);
+}
+
+/* Download notification animations */
+@keyframes downloadPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.download-notification {
+  animation: downloadPulse 2s infinite;
+}
+
+/* File type icons styling */
+.file-type-icon {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.2), 
+    oklch(0.65 0.3 300 / 0.2)
+  );
+  border-radius: 50%;
+  padding: 8px;
+  margin-bottom: 8px;
+}
