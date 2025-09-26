@@ -1,112 +1,144 @@
 # NITS Universal Forensic Intelligence System - Product Requirements Document
 
 ## Core Purpose & Success
-- **Mission Statement**: Provide comprehensive forensic document analysis with advanced natural language processing to detect compliance violations, insider trading patterns, and ESG greenwashing across SEC filings and public communications.
-- **Success Indicators**: Accurate detection of forensic patterns with AI-powered analysis providing actionable intelligence for compliance and risk assessment.
-- **Experience Qualities**: Professional, Technical, Trustworthy
+
+**Mission Statement**: Create the world's most advanced AI-powered forensic document analysis platform that enables users to create, train, and deploy custom forensic patterns for detecting compliance violations, insider trading, ESG greenwashing, and financial irregularities in corporate documents.
+
+**Success Indicators**: 
+- Users can successfully create and train custom forensic patterns
+- AI-enhanced analysis provides actionable insights with high confidence scores
+- Cross-document analysis reveals previously undetected patterns
+- Export functionality delivers professional forensic intelligence reports
+
+**Experience Qualities**: 
+- Professional: Enterprise-grade forensic analysis tools
+- Intelligent: AI-powered pattern recognition and NLP analysis
+- Empowering: Custom pattern creation gives users forensic expertise
 
 ## Project Classification & Approach
-- **Complexity Level**: Complex Application (advanced NLP functionality, multi-document analysis, AI-powered pattern detection)
-- **Primary User Activity**: Analyzing and Creating forensic intelligence reports
+
+**Complexity Level**: Complex Application with advanced AI integration, custom pattern training, multi-phase analysis pipeline, and comprehensive export functionality.
+
+**Primary User Activity**: Creating and deploying sophisticated forensic analysis patterns while conducting professional document analysis investigations.
 
 ## Thought Process for Feature Selection
-- **Core Problem Analysis**: Manual document analysis is time-intensive and prone to missing subtle patterns across large document sets
-- **User Context**: Compliance officers, forensic analysts, and legal teams need rapid identification of potential violations
-- **Critical Path**: Upload documents → AI analysis with NLP → Review findings → Export intelligence reports
-- **Key Moments**: Document upload validation, AI pattern recognition execution, results interpretation
+
+**Core Problem Analysis**: Financial regulatory compliance requires deep document analysis that traditional tools cannot provide. Users need both AI-powered intelligence and the ability to create custom forensic patterns for specific industries or use cases.
+
+**User Context**: Forensic accountants, compliance officers, regulatory investigators, and financial analysts who need to detect subtle patterns across multiple document types and timeframes.
+
+**Critical Path**: Upload documents → Apply AI + custom patterns → Review AI-enhanced findings → Export professional reports
+
+**Key Moments**: 
+1. Pattern creation and training that builds user expertise
+2. AI analysis that reveals previously hidden relationships
+3. Results presentation that enables immediate action
 
 ## Essential Features
 
-### Advanced NLP Pattern Recognition Engine
-- **Functionality**: Leverages LLM API to perform sophisticated text analysis, entity extraction, sentiment analysis, and cross-document pattern detection
-- **Purpose**: Identifies subtle linguistic patterns that indicate potential compliance violations, inconsistencies, or deceptive communications
-- **Success Criteria**: Detects patterns with high confidence scores and provides contextual explanations
+### Advanced Document Analysis Engine
+- **Functionality**: AI-powered NLP analysis with cross-document triangulation
+- **Purpose**: Detect complex patterns that human analysis might miss
+- **Success Criteria**: High confidence scores (>80%) on pattern matches
 
-### Dual-Zone Upload System  
-- **Functionality**: Separate upload areas for SEC regulatory documents and public communications with real-time validation
-- **Purpose**: Enables cross-document triangulation analysis between official filings and public statements
-- **Success Criteria**: Smooth file handling with clear visual feedback and comprehensive format support
+### Custom Pattern Training Interface
+- **Functionality**: Visual pattern creation with keywords, rules, severity levels, and AI-powered testing
+- **Purpose**: Enable users to create industry-specific or use-case-specific forensic patterns
+- **Success Criteria**: Users can create, test, and deploy custom patterns with measurable accuracy rates
 
-### Intelligent Risk Scoring
-- **Functionality**: AI-powered risk assessment combining traditional forensic indicators with NLP-derived insights
-- **Purpose**: Provides quantitative risk metrics with qualitative context for decision-making
-- **Success Criteria**: Accurate risk scores with clear explanations and confidence intervals
+### Multi-Tab Professional Interface
+- **Functionality**: Organized workflow with document upload, pattern training, and results dashboard
+- **Purpose**: Professional user experience that scales with complexity
+- **Success Criteria**: Intuitive navigation between analysis phases
 
-### Multi-Format Export System
-- **Functionality**: Generate professional reports in multiple formats (TXT, CSV, JSON) with AI-generated summaries
-- **Purpose**: Enables integration with existing compliance workflows and documentation requirements
-- **Success Criteria**: Clean, actionable reports that comply with professional standards
+### Comprehensive Export System
+- **Functionality**: Professional forensic reports in multiple formats (TXT, CSV, JSON)
+- **Purpose**: Integration with existing compliance and investigation workflows
+- **Success Criteria**: Reports contain actionable intelligence with proper formatting
 
 ## Design Direction
 
 ### Visual Tone & Identity
-- **Emotional Response**: Professional confidence, technical sophistication, investigative authority
-- **Design Personality**: Cyberpunk-inspired forensic interface with high-tech aesthetic
-- **Visual Metaphors**: Digital forensics laboratory, matrix-style data analysis, investigative dashboard
-- **Simplicity Spectrum**: Rich interface with organized complexity - professional tools require comprehensive features
+**Emotional Response**: Users should feel they have access to cutting-edge forensic technology that provides professional-grade analysis capabilities.
+
+**Design Personality**: Cyberpunk-inspired forensic aesthetic that conveys advanced AI capabilities while maintaining professional credibility.
+
+**Visual Metaphors**: Matrix-style interfaces, forensic laboratory aesthetics, advanced AI system indicators.
+
+**Simplicity Spectrum**: Rich interface that reveals complexity progressively - simple for basic use, powerful for expert analysis.
 
 ### Color Strategy
-- **Color Scheme Type**: Custom cyberpunk palette with functional color coding
-- **Primary Color**: Neon green (oklch(0.75 0.25 145)) - represents system activity and positive states
-- **Secondary Colors**: Electric purple (oklch(0.65 0.3 300)) for accents, cyber blue (oklch(0.1 0.02 240)) for backgrounds
-- **Accent Color**: Electric purple for highlighting critical findings and interactive elements
-- **Color Psychology**: Green suggests accuracy and go-ahead status, purple indicates high priority, red signals warnings
-- **Risk Color Coding**: Green (low risk), orange (medium), red (high), purple (critical)
-- **Foreground/Background Pairings**: 
-  - Light green text on dark background (primary content)
-  - White text on dark cards (high contrast readability)
-  - Dark text on colored backgrounds for badges and highlights
+**Color Scheme Type**: Custom cyberpunk palette with functional color coding
+
+**Primary Colors**:
+- **Neon Green (oklch(0.75 0.25 145))**: Success states, active patterns, AI confidence indicators
+- **Electric Purple (oklch(0.65 0.3 300))**: Accent color for AI features and advanced functionality
+- **Cyber Blue (oklch(0.1 0.02 240))**: Card backgrounds and structural elements
+
+**Secondary Colors**:
+- **Warning Orange (oklch(0.7 0.15 60))**: Medium risk indicators and caution states
+- **Critical Red (oklch(0.6 0.25 25))**: High risk findings and destructive actions
+
+**Color Psychology**: The cyberpunk palette communicates advanced technology and precision while maintaining professional credibility for forensic work.
+
+**Foreground/Background Pairings**:
+- Background (oklch(0.05 0 0)) with Foreground (oklch(0.9 0.05 145)) - WCAG AAA compliant
+- Card (oklch(0.1 0.02 240)) with Card-foreground (oklch(0.95 0 0)) - WCAG AAA compliant
+- Primary (oklch(0.75 0.25 145)) with Primary-foreground (oklch(0.05 0 0)) - WCAG AAA compliant
 
 ### Typography System
-- **Font Pairing Strategy**: Monospace font family (Courier Prime) for technical/forensic authenticity
-- **Typographic Hierarchy**: Bold headings, regular body text, small technical details with clear size relationships
-- **Font Personality**: Technical, authoritative, precise - conveys forensic and analytical capabilities
-- **Which fonts**: Courier Prime from Google Fonts for consistent monospace aesthetic
-- **Legibility Check**: High contrast ratios ensure readability in professional environments
+**Font Pairing Strategy**: Monospace family (Courier Prime) throughout for technical, forensic aesthetic
+
+**Typographic Hierarchy**: 
+- Headers: Bold weights with increased letter spacing
+- Body text: Regular weight with generous line height (1.5x)
+- Code/data: Monospace with syntax highlighting through color
+
+**Typography Consistency**: Single font family maintains cohesive technical aesthetic while size and weight create clear hierarchy.
+
+**Selected Fonts**: Courier Prime from Google Fonts - provides professional monospace appearance with good readability.
 
 ### Visual Hierarchy & Layout
-- **Attention Direction**: Left-to-right workflow: upload → analysis → results → export
-- **White Space Philosophy**: Generous spacing between functional areas to reduce cognitive load
-- **Grid System**: Two-column layout with controls on left, results on right
-- **Responsive Approach**: Maintains functionality across screen sizes with collapsible sections
-- **Content Density**: Balanced information richness with clear visual organization
+**Attention Direction**: Tab-based navigation guides users through analysis workflow, with primary actions highlighted in brand colors.
+
+**White Space Philosophy**: Generous spacing creates breathing room around complex technical information.
+
+**Grid System**: CSS Grid and Flexbox for responsive layout that adapts to content complexity.
+
+**Content Density**: Balanced approach - detailed information available when needed, clean overview by default.
 
 ### Animations
-- **Purposeful Meaning**: Smooth transitions reinforce system reliability and professional quality
-- **Hierarchy of Movement**: Upload zone interactions, progress indicators, collapsible sections
-- **Contextual Appropriateness**: Subtle professional animations that enhance usability without distraction
+**Purposeful Meaning**: Subtle transitions reinforce state changes and loading processes without distracting from analysis work.
+
+**Hierarchy of Movement**: Progress indicators and state transitions animated, static content remains stable.
 
 ### UI Elements & Component Selection
-- **Component Usage**: Cards for content organization, Collapsible sections for detailed results, Progress bars for analysis feedback
-- **Component Customization**: Custom upload zones with cyberpunk styling, specialized risk indicators
-- **Component States**: Clear hover, active, and disabled states for all interactive elements
-- **Icon Selection**: Phosphor icons for professional, consistent iconography
-- **Spacing System**: Consistent Tailwind spacing with generous gaps between functional areas
+**Component Usage**: Shadcn v4 components with cyberpunk customization:
+- Cards for content organization
+- Tabs for workflow navigation  
+- Collapsible sections for progressive disclosure
+- Badges for status and categorization
+- Dialogs for pattern creation workflow
 
-### Accessibility & Readability
-- **Contrast Goal**: WCAG AA compliance with high contrast ratios for professional visibility
+**Mobile Adaptation**: Responsive grid layout with stacked columns on smaller screens, preserved functionality across devices.
 
-## Advanced NLP Integration Architecture
+## Edge Cases & Problem Scenarios
+**Potential Obstacles**: 
+- Complex pattern creation might overwhelm new users
+- Large document analysis could cause performance issues
+- AI analysis failures need graceful degradation
 
-### Pattern Recognition Modules
-1. **Linguistic Inconsistency Detector**: Identifies contradictions between documents using semantic analysis
-2. **Sentiment Shift Analyzer**: Detects unusual changes in tone or confidence levels across time periods
-3. **Entity Relationship Mapper**: Tracks relationships between people, companies, and events across documents
-4. **Risk Language Classifier**: Identifies legal hedge language, disclaimers, and evasive communications
-5. **Temporal Pattern Analyzer**: Detects timing correlations between events and communications
-6. **Quantitative Claims Validator**: Cross-references numerical claims with supporting evidence
-
-### AI-Powered Analysis Pipeline
-- **Document Preprocessing**: Text extraction, tokenization, and structure analysis
-- **Contextual Understanding**: LLM-powered comprehension of document intent and content
-- **Cross-Reference Analysis**: Intelligent comparison of statements across document types
-- **Pattern Classification**: AI categorization of detected patterns with confidence scores
-- **Risk Assessment**: Weighted scoring combining traditional and AI-derived risk factors
+**Edge Case Handling**: 
+- Progressive disclosure of advanced pattern features
+- File size limits and progress indicators
+- Fallback to traditional pattern matching when AI unavailable
 
 ## Implementation Considerations
-- **Scalability Needs**: Client-side processing with efficient LLM API usage for cost-effectiveness
-- **Testing Focus**: Validation of AI pattern detection accuracy and false positive rates
-- **Critical Questions**: How to balance automation with human oversight in forensic analysis
+**Scalability Needs**: Persistent storage for custom patterns, performance optimization for large document sets
+
+**Testing Focus**: Pattern accuracy validation, AI integration reliability, export format integrity
+
+**Critical Questions**: How do we balance AI sophistication with user control? How do we validate custom pattern effectiveness?
 
 ## Reflection
-This approach uniquely combines traditional forensic analysis with modern AI capabilities, providing unprecedented depth in document analysis while maintaining the professional standards required for compliance and legal applications. The NLP integration transforms manual pattern recognition into an intelligent, scalable system that can identify subtle indicators human analysts might miss.
+This approach uniquely combines enterprise-grade forensic analysis with user-customizable AI patterns, creating a platform that grows with user expertise while maintaining professional credibility through its cyberpunk-forensic aesthetic and comprehensive feature set.

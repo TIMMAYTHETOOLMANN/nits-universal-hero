@@ -129,3 +129,35 @@
     oklch(0.65 0.3 300) 100%
   );
 }
+
+/* Pattern training interface styles */
+.pattern-badge {
+  transition: all 0.2s ease;
+}
+
+.pattern-badge:hover {
+  transform: scale(1.05);
+}
+
+.pattern-creation-form {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.9), 
+    oklch(0.12 0.02 240 / 0.9)
+  );
+  border: 1px solid oklch(0.2 0.05 240);
+}
+
+.pattern-test-success {
+  color: oklch(0.75 0.25 145);
+  background: oklch(0.75 0.25 145 / 0.1);
+}
+
+.pattern-test-warning {
+  color: oklch(0.7 0.15 60);
+  background: oklch(0.7 0.15 60 / 0.1);
+}
+
+.pattern-test-error {
+  color: oklch(0.6 0.25 25);
+  background: oklch(0.6 0.25 25 / 0.1);
+}
