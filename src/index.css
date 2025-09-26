@@ -277,6 +277,61 @@
   font-style: italic;
 }
 
+/* Cross-pattern correlation styling */
+.correlation-network-card {
+  background: linear-gradient(135deg, 
+    oklch(0.65 0.3 300 / 0.1), 
+    oklch(0.75 0.25 145 / 0.1)
+  );
+  border: 1px solid oklch(0.65 0.3 300 / 0.3);
+}
+
+.correlation-strength-indicator {
+  background: linear-gradient(90deg, 
+    oklch(0.75 0.25 145) 0%, 
+    oklch(0.65 0.3 300) 100%
+  );
+  height: 4px;
+  border-radius: 2px;
+}
+
+.sophistication-meter {
+  background: linear-gradient(135deg, 
+    oklch(0.6 0.25 25 / 0.2), 
+    oklch(0.7 0.15 60 / 0.2)
+  );
+  border: 1px solid oklch(0.6 0.25 25 / 0.3);
+}
+
+.network-complexity-glow {
+  box-shadow: 0 0 15px oklch(0.65 0.3 300 / 0.3);
+}
+
+.cascade-level-indicator {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.2), 
+    oklch(0.65 0.3 300 / 0.2)
+  );
+  border-left: 3px solid oklch(0.65 0.3 300);
+}
+
+.correlation-type-badge {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.9), 
+    oklch(0.12 0.02 240 / 0.9)
+  );
+  border: 1px solid oklch(0.65 0.3 300 / 0.5);
+  color: oklch(0.65 0.3 300);
+}
+
+.multilevel-violation-hierarchy {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.9), 
+    oklch(0.12 0.02 240 / 0.9)
+  );
+  border-left: 4px solid oklch(0.7 0.15 60);
+}
+
 /* Enhanced download system styling */
 .download-enhanced {
   background: linear-gradient(135deg, 
