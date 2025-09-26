@@ -238,3 +238,59 @@
   padding: 8px;
   margin-bottom: 8px;
 }
+
+/* SEC Penalty calculation styling */
+.sec-penalty-card {
+  background: linear-gradient(135deg, 
+    oklch(0.7 0.15 60 / 0.1), 
+    oklch(0.6 0.25 25 / 0.1)
+  );
+  border: 1px solid oklch(0.7 0.15 60 / 0.3);
+}
+
+.penalty-calculation-item {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.9), 
+    oklch(0.12 0.02 240 / 0.9)
+  );
+  border: 1px solid oklch(0.2 0.05 240);
+  transition: all 0.2s ease;
+}
+
+.penalty-calculation-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px oklch(0.7 0.15 60 / 0.2);
+}
+
+.penalty-total-glow {
+  background: linear-gradient(135deg, 
+    oklch(0.6 0.25 25 / 0.1), 
+    oklch(0.7 0.15 60 / 0.1)
+  );
+  border: 1px solid oklch(0.6 0.25 25 / 0.3);
+  box-shadow: 0 0 20px oklch(0.6 0.25 25 / 0.2);
+}
+
+.sec-citation-text {
+  color: oklch(0.65 0.3 300);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+/* Enhanced download system styling */
+.download-enhanced {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.1), 
+    oklch(0.65 0.3 300 / 0.1)
+  );
+  border: 1px solid oklch(0.75 0.25 145 / 0.3);
+}
+
+.download-success-notification {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.2), 
+    oklch(0.75 0.25 145 / 0.1)
+  );
+  border: 1px solid oklch(0.75 0.25 145 / 0.4);
+  box-shadow: 0 0 15px oklch(0.75 0.25 145 / 0.3);
+}
