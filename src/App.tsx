@@ -2624,15 +2624,16 @@ function App() {
                   `Profit realized: $${profitAmount.toLocaleString()}`,
                   'Trading date: 2 days before earnings announcement',
                   `Share quantity: ${Math.floor(10000 + (documentHashNumber % 20000))} shares`,
-                  'Material nonpublic information regarding earnings'
                 ],
                 timestamp_extracted: new Date().toISOString(),
                 confidence_level: 0.94,
                 manual_review_required: false
               }
-            } else {
               // Create comprehensive evidence for other violation types
-              const impactAmount = Math.floor(500000 + (documentHashNumber % 2000000)) // 500K-2.5M range
+            } else {
+              
+              // Calculate impactAmount for non-insider trading violations
+              const impactAmount = 50000 + (documentHashNumber % 200000) // Range: 50k-250k
               
               specificEvidence = {
                 id: `file_specific_${fileName}_${violationType}_${mapping.documentHash}`,
