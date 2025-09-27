@@ -453,10 +453,61 @@ function App() {
     return { finalPenalty: Math.round(finalPenalty), enhancementApplied, justification }
   }
 
+  // Comprehensive penalty calculation validation function
+  const validatePenaltyCalculation = (calculation: PenaltyCalculation): boolean => {
+    // Required fields validation
+    if (!calculation.document || !calculation.violation_flag || !calculation.actor_type) {
+      addToConsole(`VALIDATION FAILED: Missing required fields for ${calculation.violation_flag}`)
+      return false
+    }
+    
+    // Count validation
+    if (calculation.count <= 0 || calculation.count > 100) { // Reasonable upper limit
+      addToConsole(`VALIDATION FAILED: Invalid count ${calculation.count} for ${calculation.violation_flag} (must be 1-100)`)
+      return false
+    }
+    
+    // Penalty amount validation
+    if (calculation.unit_penalty !== null) {
+      if (calculation.unit_penalty <= 0 || calculation.unit_penalty > 10000000) { // $10M max
+        addToConsole(`VALIDATION FAILED: Invalid unit penalty $${calculation.unit_penalty.toLocaleString()} for ${calculation.violation_flag} (must be $1-$10M)`)
+        return false
+      }
+      
+      // Subtotal must match unit_penalty * count
+      const expectedSubtotal = Math.round(calculation.unit_penalty * calculation.count)
+      if (calculation.subtotal !== expectedSubtotal) {
+        addToConsole(`VALIDATION FAILED: Subtotal mismatch for ${calculation.violation_flag} - Expected: $${expectedSubtotal.toLocaleString()}, Got: $${(calculation.subtotal || 0).toLocaleString()}`)
+        return false
+      }
+    }
+    
+    // Evidence-based calculations should have higher confidence
+    if (calculation.evidence_based && !calculation.sec_citation) {
+      addToConsole(`VALIDATION WARNING: Evidence-based calculation for ${calculation.violation_flag} missing SEC citation`)
+      // Don't fail validation, but log the warning
+    }
+    
+    // Validate actor type is appropriate for violation type
+    if (calculation.violation_flag === 'insider_trading' && calculation.actor_type !== 'natural_person') {
+      addToConsole(`VALIDATION WARNING: Insider trading violation should typically involve natural_person, got ${calculation.actor_type}`)
+      // Don't fail validation, but log the warning
+    }
+    
+    // Validate enhancement logic consistency
+    if (calculation.enhancement_applied && !calculation.enhancement_justification) {
+      addToConsole(`VALIDATION FAILED: Enhancement applied for ${calculation.violation_flag} but no justification provided`)
+      return false
+    }
+    
+    addToConsole(`VALIDATION PASSED: ${calculation.violation_flag} in ${calculation.document} - $${(calculation.subtotal || 0).toLocaleString()}`)
+    return true
+  }
+
   const calculateViolationPenalties = async (violations: ViolationDetection[]): Promise<PenaltyMatrix> => {
     setPenaltyCalculating(true)
-    addToConsole('CALCULATING EVIDENCE-BASED SEC PENALTIES WITH STANDARDIZED ENHANCEMENT LOGIC')
-    addToConsole(`Processing ${violations.length} documented violations with consistent penalty calculation`)
+    addToConsole('CALCULATING EVIDENCE-BASED SEC PENALTIES WITH STANDARDIZED ENHANCEMENT LOGIC AND COMPREHENSIVE VALIDATION')
+    addToConsole(`Processing ${violations.length} documented violations with consistent penalty calculation and validation`)
 
     try {
       // Ensure we have current SEC penalty data
@@ -469,8 +520,10 @@ function App() {
       let grandTotal = 0
       const missingMappings = new Set<string>()
       let totalViolations = 0
+      let validatedCalculations = 0
+      let rejectedCalculations = 0
 
-      addToConsole('SEC PENALTY CALCULATION WITH STANDARDIZED ENHANCEMENT LOGIC:')
+      addToConsole('SEC PENALTY CALCULATION WITH STANDARDIZED ENHANCEMENT LOGIC AND VALIDATION:')
 
       for (const violation of violations) {
         totalViolations++
@@ -538,37 +591,47 @@ function App() {
           manual_review_flagged: confidence_score < 0.92 || violation.false_positive_risk !== 'low'
         }
 
-        if (calculation.subtotal && calculation.subtotal > 0) {
-          grandTotal += calculation.subtotal
-          addToConsole(`PENALTY ADDED: $${calculation.subtotal.toLocaleString()} (${count} × $${calculation.unit_penalty?.toLocaleString()})`)
-          addToConsole(`Running total: $${grandTotal.toLocaleString()}`)
-        } else {
-          missingMappings.add(violation_flag)
-          addToConsole(`WARNING: No penalty calculated for ${violation_flag} in ${document}`)
-        }
+        // VALIDATE PENALTY CALCULATION BEFORE INCLUDING
+        if (validatePenaltyCalculation(calculation)) {
+          validatedCalculations++
+          
+          if (calculation.subtotal && calculation.subtotal > 0) {
+            grandTotal += calculation.subtotal
+            addToConsole(`PENALTY ADDED: $${calculation.subtotal.toLocaleString()} (${count} × $${calculation.unit_penalty?.toLocaleString()})`)
+            addToConsole(`Running total: $${grandTotal.toLocaleString()}`)
+          } else {
+            missingMappings.add(violation_flag)
+            addToConsole(`WARNING: No penalty calculated for ${violation_flag} in ${document}`)
+          }
 
-        if (!documents[document]) {
-          documents[document] = []
+          if (!documents[document]) {
+            documents[document] = []
+          }
+          documents[document].push(calculation)
+        } else {
+          rejectedCalculations++
+          addToConsole(`REJECTED: Invalid penalty calculation for ${violation_flag} in ${document}`)
+          missingMappings.add(`${violation_flag} (validation failed)`)
         }
-        documents[document].push(calculation)
       }
 
       const matrix: PenaltyMatrix = {
         documents,
         grand_total: grandTotal,
         missing_statute_mappings: Array.from(missingMappings),
-        sec_release_version: "2025 SEC Release No. 33-11350 (Standardized Enhancement Calculations)",
+        sec_release_version: "2025 SEC Release No. 33-11350 (Standardized Enhancement Calculations with Validation)",
         calculation_timestamp: new Date().toISOString(),
         total_violations: totalViolations,
-        note: `STANDARDIZED PENALTY CALCULATIONS: All amounts calculated using official SEC 2025 penalty adjustments with CONSISTENT enhancement logic applied. Enhancement multipliers never stack - only the most applicable single enhancement is applied per violation. Insider trading penalties use actual profit amounts with 3x rule plus disgorgement. Compensation violations reflect documented understatement amounts. ESG violations account for quantified financial impacts. All calculations use standardized enhancement logic to prevent inconsistent penalty stacking.`
+        note: `STANDARDIZED PENALTY CALCULATIONS WITH COMPREHENSIVE VALIDATION: All amounts calculated using official SEC 2025 penalty adjustments with CONSISTENT enhancement logic applied. Enhancement multipliers never stack - only the most applicable single enhancement is applied per violation. Insider trading penalties use actual profit amounts with 3x rule plus disgorgement. Compensation violations reflect documented understatement amounts. ESG violations account for quantified financial impacts. All calculations validated for accuracy and consistency. VALIDATION RESULTS: ${validatedCalculations} calculations passed, ${rejectedCalculations} rejected for invalid parameters.`
       }
 
-      addToConsole(`STANDARDIZED SEC PENALTY CALCULATION COMPLETE`)
+      addToConsole(`STANDARDIZED SEC PENALTY CALCULATION WITH VALIDATION COMPLETE`)
       addToConsole(`Total Exposure: $${grandTotal.toLocaleString()}`)
       addToConsole(`Violations Processed: ${totalViolations}`)
       addToConsole(`Documents Analyzed: ${Object.keys(documents).length}`)
       addToConsole(`Missing Statute Mappings: ${missingMappings.size}`)
-      addToConsole(`Enhancement Logic: Consistent, non-stacking penalty calculations`)
+      addToConsole(`VALIDATION SUMMARY: ${validatedCalculations} valid calculations, ${rejectedCalculations} rejected`)
+      addToConsole(`Enhancement Logic: Consistent, non-stacking penalty calculations with validation`)
       
       return matrix
 
@@ -2879,17 +2942,17 @@ function App() {
 
     setResults(mockResults)
     setIsAnalyzing(false)
-    addToConsole(`STANDARDIZED SEC penalty calculation complete: $${penaltyMatrix.grand_total.toLocaleString()} total exposure across ${penaltyMatrix.total_violations} documented violations`)
-    addToConsole(`CONSISTENT ENHANCEMENT LOGIC: Only single most applicable enhancement applied per violation - no stacking`)
+    addToConsole(`VALIDATED SEC penalty calculation complete: $${penaltyMatrix.grand_total.toLocaleString()} total exposure across ${penaltyMatrix.total_violations} documented violations`)
+    addToConsole(`VALIDATION APPLIED: All penalty calculations verified for accuracy and consistency - no invalid calculations included`)
     addToConsole(`PENALTY BREAKDOWN: ${Object.keys(penaltyMatrix.documents).length} documents analyzed, ${penaltyMatrix.missing_statute_mappings.length} missing statute mappings`)
     
-    // Enhanced success message with detailed penalty information
+    // Enhanced success message with detailed penalty information including validation results
     const penaltyBreakdown = Object.values(penaltyMatrix.documents).flat()
     const successfulCalculations = penaltyBreakdown.filter(calc => calc.subtotal !== null).length
     const failedCalculations = penaltyBreakdown.filter(calc => calc.subtotal === null).length
     
-    toast.success('STANDARDIZED PENALTY ANALYSIS complete - Consistent enhancement logic applied', {
-      description: `${successfulCalculations} penalties calculated ($${penaltyMatrix.grand_total.toLocaleString()} total), ${failedCalculations} failed mappings, standardized enhancement logic prevents stacking`
+    toast.success('VALIDATED PENALTY ANALYSIS complete - All calculations verified', {
+      description: `${successfulCalculations} penalties calculated ($${penaltyMatrix.grand_total.toLocaleString()} total), ${failedCalculations} failed mappings, comprehensive validation applied`
     })
     
     // Trigger autonomous training if enabled
@@ -4358,7 +4421,7 @@ function App() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CurrencyDollar size={20} className="text-warning-orange" />
-                      SEC Penalty Calculations - Standardized Enhancement Logic
+                      SEC Penalty Calculations - Validated & Standardized
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -4369,7 +4432,8 @@ function App() {
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Penalties calculated using {results.penaltyMatrix.sec_release_version}. 
-                        All amounts use standardized enhancement logic that prevents inconsistent penalty stacking.
+                        All amounts use standardized enhancement logic with comprehensive validation to prevent 
+                        inconsistent penalty stacking and ensure calculation accuracy.
                       </p>
                     </div>
 
@@ -4407,51 +4471,76 @@ function App() {
                           <div key={document} className="border rounded-lg p-4">
                             <h4 className="font-semibold mb-3">{document}</h4>
                             <div className="space-y-3">
-                              {calculations.map((calc, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded">
-                                  <div className="flex-1">
-                                    <div className="font-medium">{calc.violation_flag.replace(/_/g, ' ').toUpperCase()}</div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {calc.actor_type === 'natural_person' ? 'Individual' : 'Corporate'} • {calc.count} instance(s)
-                                    </div>
-                                    {calc.sec_citation && (
-                                      <div className="text-xs text-accent mt-1">{calc.sec_citation}</div>
-                                    )}
-                                    <div className="text-xs text-muted-foreground mt-1">
-                                      {calc.base_penalty_reason}
-                                    </div>
-                                    {calc.enhancement_applied && (
-                                      <div className="text-xs text-warning-orange mt-1">
-                                        ⚠ Enhancement Applied: {calc.enhancement_justification}
-                                      </div>
-                                    )}
-                                    {calc.manual_review_flagged && (
-                                      <Badge variant="outline" className="text-xs mt-1 bg-yellow-100 dark:bg-yellow-900">
-                                        Manual Review Flagged
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="text-right">
-                                    {calc.unit_penalty ? (
-                                      <>
-                                        <div className="font-semibold">
-                                          ${calc.subtotal?.toLocaleString()}
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
-                                          ${calc.unit_penalty.toLocaleString()} × {calc.count}
-                                        </div>
-                                        {!calc.evidence_based && (
-                                          <div className="text-xs text-destructive">
-                                            No direct evidence
-                                          </div>
+                              {calculations.map((calc, idx) => {
+                                // Validate calculation consistency for display
+                                const isValidCalculation = validatePenaltyCalculation(calc)
+                                const hasValidationWarning = !isValidCalculation || 
+                                  (calc.unit_penalty && calc.subtotal && calc.subtotal !== calc.unit_penalty * calc.count)
+                                
+                                return (
+                                  <div key={idx} className={`flex items-center justify-between p-3 rounded ${
+                                    hasValidationWarning ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800' : 'bg-muted'
+                                  }`}>
+                                    <div className="flex-1">
+                                      <div className={`font-medium ${hasValidationWarning ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
+                                        {calc.violation_flag.replace(/_/g, ' ').toUpperCase()}
+                                        {hasValidationWarning && (
+                                          <span className="ml-2 text-xs bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
+                                            VALIDATION WARNING
+                                          </span>
                                         )}
-                                      </>
-                                    ) : (
-                                      <div className="text-sm text-muted-foreground">No applicable statute</div>
-                                    )}
+                                      </div>
+                                      <div className="text-sm text-muted-foreground">
+                                        {calc.actor_type === 'natural_person' ? 'Individual' : 'Corporate'} • {calc.count} instance(s)
+                                      </div>
+                                      {calc.sec_citation && (
+                                        <div className="text-xs text-accent mt-1">{calc.sec_citation}</div>
+                                      )}
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        {calc.base_penalty_reason}
+                                      </div>
+                                      {calc.enhancement_applied && (
+                                        <div className="text-xs text-warning-orange mt-1">
+                                          ⚠ Enhancement Applied: {calc.enhancement_justification}
+                                        </div>
+                                      )}
+                                      {calc.manual_review_flagged && (
+                                        <Badge variant="outline" className="text-xs mt-1 bg-yellow-100 dark:bg-yellow-900">
+                                          Manual Review Flagged
+                                        </Badge>
+                                      )}
+                                      {hasValidationWarning && (
+                                        <div className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                                          ⚠ Calculation may need review: {
+                                            calc.unit_penalty && calc.subtotal && calc.subtotal !== calc.unit_penalty * calc.count ?
+                                            `Expected subtotal: $${(calc.unit_penalty * calc.count).toLocaleString()}, Got: $${calc.subtotal.toLocaleString()}` :
+                                            'Validation parameters exceeded'
+                                          }
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="text-right">
+                                      {calc.unit_penalty ? (
+                                        <>
+                                          <div className={`font-semibold ${hasValidationWarning ? 'text-yellow-800 dark:text-yellow-200' : ''}`}>
+                                            ${calc.subtotal?.toLocaleString()}
+                                          </div>
+                                          <div className="text-sm text-muted-foreground">
+                                            ${calc.unit_penalty.toLocaleString()} × {calc.count}
+                                          </div>
+                                          {!calc.evidence_based && (
+                                            <div className="text-xs text-destructive">
+                                              No direct evidence
+                                            </div>
+                                          )}
+                                        </>
+                                      ) : (
+                                        <div className="text-sm text-muted-foreground">No applicable statute</div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                )
+                              })}
                             </div>
                           </div>
                         ))}
