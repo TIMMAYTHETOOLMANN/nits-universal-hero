@@ -128,7 +128,7 @@ function App() {
             ({fileManagement.secFiles.length} SEC, {fileManagement.glamourFiles.length} Glamour)
           </div>
           <div>
-            AI Patterns: {autonomousTraining.autonomousPatterns.length} 
+            AI Patterns: {autonomousTraining.autonomousPatterns?.length || 0} 
             ({autonomousTraining.getActivePatterns().length} active)
           </div>
           {autonomousTraining.trainingStatus?.isActive && (
@@ -208,7 +208,7 @@ function App() {
                   lastTrainingTime: null,
                   trainingLog: []
                 }}
-                autonomousPatterns={autonomousTraining.autonomousPatterns}
+                autonomousPatterns={autonomousTraining.autonomousPatterns || []}
                 isTraining={autonomousTraining.isTraining}
                 onTogglePattern={autonomousTraining.togglePattern}
                 onDeletePattern={autonomousTraining.deletePattern}

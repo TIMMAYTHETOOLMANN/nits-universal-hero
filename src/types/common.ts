@@ -8,9 +8,4 @@ export type RiskLevel = 'low' | 'medium' | 'high' | 'critical'
 export type ActorType = 'natural_person' | 'other_person'
 export type FalsePositiveRisk = 'low' | 'medium' | 'high'
 
-export interface Window {
-  spark: {
-    llmPrompt: (strings: TemplateStringsArray, ...values: any[]) => string
-    llm: (prompt: string, modelName?: string, jsonMode?: boolean) => Promise<string>
-  }
-}
+// Window interface declaration moved to hooks/useAutonomousTraining.ts as global declaration
