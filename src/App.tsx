@@ -2267,6 +2267,7 @@ function App() {
     // EVIDENCE-BASED violation generation with FILE-SPECIFIC locations and EXACT dollar amounts
     const generateViolationsFromAnalysis = (analysisResults: AnalysisResult): ViolationDetection[] => {
       const violations: ViolationDetection[] = []
+      const processedViolations = new Set<string>() // Track processed violation keys to prevent duplicates
       
       // Create DETERMINISTIC file-specific violation mappings with consistent amounts
       const fileViolationMap = new Map<string, {
@@ -2369,11 +2370,21 @@ function App() {
         }
       })
 
-      // Process precision analysis results with EXACT file locations and CONSISTENT amounts
+      // Process precision analysis results with EXACT file locations and CONSISTENT amounts (PRIORITY 1)
       if (analysisResults.nlpSummary && nlpResults?.evidenceExtracts) {
+        addToConsole('Processing NLP evidence extracts with file-specific locations (Priority 1)')
+        
         nlpResults.evidenceExtracts.forEach((evidence: ViolationEvidence, evidenceIndex: number) => {
           // Use EXACT file reference from evidence
           const sourceFile = (evidence as any).source_file || 'Unknown Document'
+          const violationKey = `${sourceFile}_${evidence.violation_type}_${evidence.id}` // Include evidence ID for uniqueness
+          
+          // Skip if already processed (prevent duplicates)
+          if (processedViolations.has(violationKey)) {
+            addToConsole(`Skipping duplicate NLP violation: ${violationKey}`)
+            return
+          }
+          
           const fileMapping = fileViolationMap.get(sourceFile)
           
           // Create violation only if we have strong evidence and file match
@@ -2411,18 +2422,29 @@ function App() {
               false_positive_risk: evidence.manual_review_required ? 'medium' : 'low'
             })
             
+            processedViolations.add(violationKey) // Mark as processed
             addToConsole(`EVIDENCE-BASED violation created: ${evidence.violation_type} in ${sourceFile} with ${exactProfitAmount ? '$' + exactProfitAmount.toLocaleString() + ' profit' : 'no profit'} (confidence: ${(evidence.confidence_level * 100).toFixed(1)}%)`)
           }
         })
       }
       
-      // Generate CONSISTENT violations based on uploaded files (ensuring penalty calculations reflect file content)
+      // Generate CONSISTENT violations based on uploaded files (ensuring penalty calculations reflect file content) - PRIORITY 2
       if (analysisResults.summary.riskScore >= 7.0 && fileViolationMap.size > 0) {
-        addToConsole(`Risk score ${analysisResults.summary.riskScore.toFixed(1)}/10 - generating CONSISTENT file-specific violations based on uploaded documents`)
+        addToConsole(`Risk score ${analysisResults.summary.riskScore.toFixed(1)}/10 - generating CONSISTENT file-specific violations based on uploaded documents (Priority 2)`)
         
         // Create violations based on ACTUAL file types uploaded with DETERMINISTIC amounts
         fileViolationMap.forEach((mapping, fileName) => {
           mapping.expectedViolations.forEach((violationType, index) => {
+            const violationKey = `${fileName}_${violationType}_file_based` // Use consistent key format
+            
+            // Skip if already processed by NLP analysis (prevent duplicates)
+            if (processedViolations.has(violationKey) || 
+                Array.from(processedViolations).some(key => 
+                  key.startsWith(`${fileName}_${violationType}_`)
+                )) {
+              addToConsole(`Skipping duplicate file-based violation: ${violationKey} (already processed by NLP)`)
+              return
+            }
             
             // Create specific evidence based on file type with CONSISTENT amounts
             let specificEvidence: ViolationEvidence
@@ -2563,61 +2585,72 @@ function App() {
               false_positive_risk: 'low'
             })
             
+            processedViolations.add(violationKey) // Mark as processed
             addToConsole(`CONSISTENT file-specific violation generated: ${violationType} in ${fileName}${profitAmount ? ` with $${profitAmount.toLocaleString()} profit` : ''}`)
           })
         })
         
-        // Add cross-document violations with SPECIFIC file references and CONSISTENT calculations
+        // Add cross-document violations with SPECIFIC file references and CONSISTENT calculations - PRIORITY 3
         if ((secFiles || []).length > 0 && (glamourFiles || []).length > 0) {
-          const secFileNames = (secFiles || []).map(f => f.name).join(', ')
-          const publicFileNames = (glamourFiles || []).map(f => f.name).join(', ')
+          const crossDocViolationKey = `cross_analysis_${(secFiles || []).length}_sec_${(glamourFiles || []).length}_public`
           
-          // Generate CONSISTENT cross-document violation amounts based on file combinations
-          const combinedHashNumber = combinedHash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-          const riskVariance = 25 + (combinedHashNumber % 15) // 25-40% variance
-          const marketCapImpact = Math.floor(500000000 + (combinedHashNumber % 500000000)) // 500M-1B range
-          
-          const crossDocEvidence: ViolationEvidence = {
-            id: `cross_doc_evidence_${combinedHash}`,
-            violation_type: 'cross_document_inconsistency',
-            exact_quote: `Cross-document analysis reveals material inconsistencies between SEC filings (${secFileNames}) and public communications (${publicFileNames}). Risk characterization differs by ${riskVariance}% between regulatory and investor presentations, creating material omissions in required disclosures affecting $${(marketCapImpact / 1000000).toFixed(0)}M market cap valuation.`,
-            page_number: undefined,
-            section_reference: `Cross-document analysis: SEC files (${(secFiles || []).length}) vs Public files (${(glamourFiles || []).length})`,
-            context_before: `Comparative analysis of ${(secFiles || []).length} SEC regulatory documents and ${(glamourFiles || []).length} public investor communications revealed`,
-            context_after: 'requiring immediate disclosure correction to ensure consistent risk characterization across all investor communications',
-            rule_violated: '17 CFR 240.12b-20 - Additional Information Rule',
-            legal_standard: 'Material omission creating inconsistent investor information across documents',
-            materiality_threshold_met: true,
-            corroborating_evidence: [
-              `SEC files analyzed: ${secFileNames}`,
-              `Public files analyzed: ${publicFileNames}`,
-              `Risk characterization variance: ${riskVariance}%`,
-              `Market cap impact: $${(marketCapImpact / 1000000).toFixed(0)}M affected valuation`
-            ],
-            timestamp_extracted: new Date().toISOString(),
-            confidence_level: 0.95,
-            manual_review_required: false
+          // Only add cross-document violation if not already processed
+          if (!processedViolations.has(crossDocViolationKey)) {
+            const secFileNames = (secFiles || []).map(f => f.name).join(', ')
+            const publicFileNames = (glamourFiles || []).map(f => f.name).join(', ')
+            
+            // Generate CONSISTENT cross-document violation amounts based on file combinations
+            const combinedHashNumber = combinedHash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+            const riskVariance = 25 + (combinedHashNumber % 15) // 25-40% variance
+            const marketCapImpact = Math.floor(500000000 + (combinedHashNumber % 500000000)) // 500M-1B range
+            
+            const crossDocEvidence: ViolationEvidence = {
+              id: `cross_doc_evidence_${combinedHash}`,
+              violation_type: 'cross_document_inconsistency',
+              exact_quote: `Cross-document analysis reveals material inconsistencies between SEC filings (${secFileNames}) and public communications (${publicFileNames}). Risk characterization differs by ${riskVariance}% between regulatory and investor presentations, creating material omissions in required disclosures affecting $${(marketCapImpact / 1000000).toFixed(0)}M market cap valuation.`,
+              page_number: undefined,
+              section_reference: `Cross-document analysis: SEC files (${(secFiles || []).length}) vs Public files (${(glamourFiles || []).length})`,
+              context_before: `Comparative analysis of ${(secFiles || []).length} SEC regulatory documents and ${(glamourFiles || []).length} public investor communications revealed`,
+              context_after: 'requiring immediate disclosure correction to ensure consistent risk characterization across all investor communications',
+              rule_violated: '17 CFR 240.12b-20 - Additional Information Rule',
+              legal_standard: 'Material omission creating inconsistent investor information across documents',
+              materiality_threshold_met: true,
+              corroborating_evidence: [
+                `SEC files analyzed: ${secFileNames}`,
+                `Public files analyzed: ${publicFileNames}`,
+                `Risk characterization variance: ${riskVariance}%`,
+                `Market cap impact: $${(marketCapImpact / 1000000).toFixed(0)}M affected valuation`
+              ],
+              timestamp_extracted: new Date().toISOString(),
+              confidence_level: 0.95,
+              manual_review_required: false
+            }
+            
+            // CONSISTENT count based on actual cross-references
+            const consistentCount = Math.min(5, Math.floor((secFiles?.length || 0) * (glamourFiles?.length || 0) / 2) + 1)
+            
+            violations.push({
+              document: `Cross-Analysis: ${(secFiles || []).length} SEC + ${(glamourFiles || []).length} Public files`,
+              violation_flag: 'cross_document_inconsistency',
+              actor_type: 'other_person',
+              count: consistentCount, // Consistent count based on file combinations
+              evidence: [crossDocEvidence],
+              statutory_basis: '15 U.S.C. 78t(d)',
+              confidence_score: 0.95,
+              false_positive_risk: 'low'
+            })
+            
+            processedViolations.add(crossDocViolationKey) // Mark as processed
+            addToConsole(`CONSISTENT cross-document violation created between ${(secFiles || []).length} SEC files and ${(glamourFiles || []).length} public files with count: ${consistentCount}`)
+          } else {
+            addToConsole(`Skipping duplicate cross-document violation: already processed`)
           }
-          
-          // CONSISTENT count based on actual cross-references
-          const consistentCount = Math.min(5, Math.floor((secFiles?.length || 0) * (glamourFiles?.length || 0) / 2) + 1)
-          
-          violations.push({
-            document: `Cross-Analysis: ${(secFiles || []).length} SEC + ${(glamourFiles || []).length} Public files`,
-            violation_flag: 'cross_document_inconsistency',
-            actor_type: 'other_person',
-            count: consistentCount, // Consistent count based on file combinations
-            evidence: [crossDocEvidence],
-            statutory_basis: '15 U.S.C. 78t(d)',
-            confidence_score: 0.95,
-            false_positive_risk: 'low'
-          })
-          
-          addToConsole(`CONSISTENT cross-document violation created between ${(secFiles || []).length} SEC files and ${(glamourFiles || []).length} public files with count: ${consistentCount}`)
         }
       }
       
       addToConsole(`TOTAL VIOLATIONS GENERATED: ${violations.length} with file-specific evidence and exact profit amounts`)
+      addToConsole(`DEDUPLICATION SUMMARY: ${processedViolations.size} unique violation keys processed, ${violations.length} final violations`)
+      addToConsole(`PRIORITY BREAKDOWN: NLP-based (Priority 1), File-based (Priority 2), Cross-document (Priority 3)`)
       return violations
     }
 
