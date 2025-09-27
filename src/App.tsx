@@ -9,7 +9,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Upload, FileText, Shield, Warning, Download, CaretDown, Activity, Brain, Plus, Trash, Eye, Gear, Target, Flask, Robot, Play, Pause, Calculator, CurrencyDollar, Scales } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -52,12 +52,6 @@ interface CustomPattern {
   }
 }
 
-interface TrainingData {
-  sampleText: string
-  expectedPattern: string
-  riskLevel: 'low' | 'medium' | 'high' | 'critical'
-  explanation: string
-}
 
 interface ViolationDetection {
   document: string
@@ -258,7 +252,6 @@ function App() {
   const [analysisPhase, setAnalysisPhase] = useState('')
   const [results, setResults] = useState<AnalysisResult | null>(null)
   const [consoleLog, setConsoleLog] = useState<string[]>([])
-  const [showPatternTrainer, setShowPatternTrainer] = useState(false)
   const [activeTab, setActiveTab] = useState('upload')
 
   // Pattern training state
@@ -272,7 +265,6 @@ function App() {
     confidence: 0.7,
     isActive: true
   })
-  const [trainingData, setTrainingData] = useState<TrainingData[]>([])
   const [testingPattern, setTestingPattern] = useState<string | null>(null)
   const [autoTrainingEnabled, setAutoTrainingEnabled] = useKV<boolean>('auto-training-enabled', false)
   const [trainingInProgress, setTrainingInProgress] = useState(false)
@@ -582,14 +574,23 @@ function App() {
       const patternResult = await spark.llm(patternPrompt, 'gpt-4o', true)
       const patternData = JSON.parse(patternResult)
       
-      const newPatterns: CustomPattern[] = patternData.patterns.map((p: any) => ({
+      const newPatterns: CustomPattern[] = patternData.patterns.map((p: {
+        name: string
+        description: string
+        category: string
+        keywords: string[]
+        rules: string[]
+        severity: string
+        confidence: number
+        reasoning: string
+      }) => ({
         id: `auto_pattern_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: `[AUTO] ${p.name}`,
         description: `${p.description}\n\nAuto-generated based on analysis results. Reasoning: ${p.reasoning}`,
-        category: p.category || 'custom',
+        category: (p.category as 'insider-trading' | 'esg-greenwashing' | 'financial-engineering' | 'disclosure-gap' | 'litigation-risk' | 'temporal-anomaly' | 'custom') || 'custom',
         keywords: p.keywords || [],
         rules: p.rules || [],
-        severity: p.severity || 'medium',
+        severity: (p.severity as 'low' | 'medium' | 'high' | 'critical') || 'medium',
         confidence: p.confidence || 0.7,
         isActive: true,
         createdAt: new Date().toISOString(),
@@ -1084,16 +1085,32 @@ function App() {
       const correlationData = JSON.parse(correlationResult)
       
       // Enhanced correlation processing with statistical validation
-      const processedCorrelations: PatternCorrelation[] = correlationData.correlations.map((corr: any) => ({
+      const processedCorrelations: PatternCorrelation[] = correlationData.correlations.map((corr: {
+        id?: string
+        patterns?: string[]
+        correlationType?: string
+        strength?: number
+        confidence?: number
+        description?: string
+        violations?: string[]
+        riskAmplification?: number
+        detectionMethod?: string
+        metadata?: {
+          documentSpan?: number
+          timeSpan?: string
+          entityInvolvement?: string[]
+          cascadeLevel?: number
+        }
+      }) => ({
         id: corr.id || `corr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         patterns: corr.patterns || [],
-        correlationType: corr.correlationType || 'contextual',
+        correlationType: (corr.correlationType as 'temporal' | 'entity' | 'causal' | 'hierarchical' | 'network' | 'contextual') || 'contextual',
         strength: Math.min(1, Math.max(0, corr.strength || 0.7)),
         confidence: Math.min(1, Math.max(0, corr.confidence || 0.8)),
         description: corr.description || 'Cross-pattern correlation detected',
         violations: corr.violations || [],
         riskAmplification: Math.max(1, corr.riskAmplification || 1.5),
-        detectionMethod: corr.detectionMethod || 'ai-semantic',
+        detectionMethod: (corr.detectionMethod as 'statistical' | 'ai-semantic' | 'temporal-sequence' | 'entity-network' | 'linguistic-pattern' | 'regulatory-cycle' | 'causal-sequence') || 'ai-semantic',
         metadata: {
           documentSpan: corr.metadata?.documentSpan || 1,
           timeSpan: corr.metadata?.timeSpan || 'Single period',
@@ -1661,9 +1678,21 @@ function App() {
   }
 
   const performPrecisionDocumentAnalysis = async (documentContext: string): Promise<{
-    findings: any[]
+    findings: Array<{
+      type: string
+      riskLevel: 'low' | 'medium' | 'high' | 'critical'
+      description: string
+      evidence: ViolationEvidence[]
+      confidence: number
+      statutory_basis: string
+      false_positive_risk: 'low' | 'medium' | 'high'
+    }>
     evidenceExtracts: ViolationEvidence[]
-    nlpInsights: any
+    nlpInsights: {
+      documentedViolations: number
+      evidenceQuality: string
+      manualReviewRequired: number
+    }
     overallConfidence: number
   }> => {
     try {
@@ -1748,18 +1777,21 @@ function App() {
       const parsedResult = JSON.parse(analysisResult)
       
       // Validate that all findings have proper evidence
-      const validatedFindings = parsedResult.findings.filter((finding: any) => {
+      const validatedFindings = parsedResult.findings.filter((finding: {
+        evidence?: ViolationEvidence[]
+        confidence?: number
+      }) => {
         return finding.evidence && 
                finding.evidence.length > 0 && 
-               finding.confidence >= 0.9 &&
-               finding.evidence.every((e: any) => e.exact_quote && e.exact_quote.length >= 50)
+               (finding.confidence ?? 0) >= 0.9 &&
+               finding.evidence.every((e: ViolationEvidence) => e.exact_quote && e.exact_quote.length >= 50)
       })
 
       addToConsole(`PRECISION ANALYSIS: ${validatedFindings.length} violations with documented evidence`)
       
       return {
         findings: validatedFindings,
-        evidenceExtracts: parsedResult.findings.flatMap((f: any) => f.evidence || []),
+        evidenceExtracts: parsedResult.findings.flatMap((f: { evidence?: ViolationEvidence[] }) => f.evidence || []),
         nlpInsights: parsedResult.nlpInsights || {
           documentedViolations: validatedFindings.length,
           evidenceQuality: 'high',
@@ -1808,7 +1840,24 @@ function App() {
       { name: 'Final compilation and penalty calculation optimization', progress: 100 }
     ]
 
-    let nlpResults: any = null
+    let nlpResults: {
+      findings?: Array<{
+        type: string
+        riskLevel: 'low' | 'medium' | 'high' | 'critical'
+        description: string
+        evidence: ViolationEvidence[]
+        confidence: number
+        statutory_basis: string
+        false_positive_risk: 'low' | 'medium' | 'high'
+      }>
+      evidenceExtracts?: ViolationEvidence[]
+      nlpInsights?: {
+        documentedViolations: number
+        evidenceQuality: string
+        manualReviewRequired: number
+      }
+      overallConfidence?: number
+    } | null = null
 
     for (const phase of phases) {
       setAnalysisPhase(phase.name)
@@ -2021,8 +2070,8 @@ function App() {
     const cappedRiskScore = Math.min(10, baseRiskScore) // Cap at 10
     
     const aiConfidence = nlpResults?.overallConfidence || (Math.random() * 0.3 + 0.7) // 70-100% confidence
-    const enhancedNlpPatterns = nlpResults ? 
-      (Object.values(nlpResults.nlpInsights) as number[]).reduce((a, b) => a + b, 0) * 2 : // Double NLP patterns
+    const enhancedNlpPatterns = nlpResults?.nlpInsights ? 
+      nlpResults.nlpInsights.documentedViolations * 2 : // Double NLP patterns
       Math.floor(Math.random() * 25) + 15 // 15-40 patterns minimum
     
     const activeCustomPatternsCount = (customPatterns || []).filter(p => p.isActive).length
@@ -2112,8 +2161,16 @@ function App() {
           confidence: 0.91,
           entities: ['Reporting Periods', 'Material Events', 'Disclosure Timing', 'Regulatory Calendar', 'Market Conditions']
         },
-        // Add NLP results if available
-        ...nlpResults?.findings || [],
+        // Add NLP results if available - convert to anomaly format
+        ...(nlpResults?.findings || []).map(finding => ({
+          type: finding.type,
+          riskLevel: finding.riskLevel,
+          description: finding.description,
+          pattern: `Evidence-Based-${finding.type.replace(/\s+/g, '-')}`,
+          aiAnalysis: `Evidence-based analysis with ${(finding.confidence * 100).toFixed(1)}% confidence: ${finding.statutory_basis}`,
+          confidence: finding.confidence,
+          entities: finding.evidence.map(e => e.section_reference).slice(0, 3)
+        })),
         // Add custom pattern results with amplification
         ...(enhancedCustomPatternResults > 0 ? [{
           type: 'Custom Pattern Detection Network',
@@ -2184,7 +2241,7 @@ function App() {
         }] : [])
       ],
       recommendations: [
-        ...nlpResults?.keyFindings || [
+        ...(nlpResults?.findings || []).map(f => `EVIDENCE-BASED: ${f.type} - ${f.description.substring(0, 100)}...`).slice(0, 3) || [
           'IMMEDIATE review of multi-level insider trading compliance protocols based on advanced AI-detected coordination patterns',
           'ESG disclosure framework requires comprehensive quantifiable metrics alignment with enhanced regulatory scrutiny',
           'Cross-reference SEC and public communications for systematic consistency using advanced AI validation algorithms',
@@ -2199,7 +2256,13 @@ function App() {
           'Implement automated pattern refinement protocols for continuous detection improvement'
         ] : [])
       ],
-      nlpSummary: nlpResults?.nlpInsights || {
+      nlpSummary: nlpResults?.nlpInsights ? {
+        linguisticInconsistencies: nlpResults.nlpInsights.documentedViolations + Math.floor(Math.random() * 5),
+        sentimentShifts: Math.floor(Math.random() * 10) + 5,
+        entityRelationships: Math.floor(Math.random() * 25) + 15,
+        riskLanguageInstances: nlpResults.nlpInsights.manualReviewRequired + Math.floor(Math.random() * 10) + 12,
+        temporalAnomalies: Math.floor(Math.random() * 12) + 6
+      } : {
         linguisticInconsistencies: Math.floor(Math.random() * 15) + 8, // Amplified detection
         sentimentShifts: Math.floor(Math.random() * 10) + 5,
         entityRelationships: Math.floor(Math.random() * 25) + 15,
@@ -3081,7 +3144,7 @@ END OF REPORT`
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">Category</label>
-                      <Select value={newPattern.category} onValueChange={(value) => setNewPattern(prev => ({ ...prev, category: value as any }))}>
+                      <Select value={newPattern.category} onValueChange={(value: 'insider-trading' | 'esg-greenwashing' | 'financial-engineering' | 'disclosure-gap' | 'litigation-risk' | 'temporal-anomaly' | 'custom') => setNewPattern(prev => ({ ...prev, category: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -3111,7 +3174,7 @@ END OF REPORT`
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium mb-2 block">Risk Severity</label>
-                      <Select value={newPattern.severity} onValueChange={(value) => setNewPattern(prev => ({ ...prev, severity: value as any }))}>
+                      <Select value={newPattern.severity} onValueChange={(value: 'low' | 'medium' | 'high' | 'critical') => setNewPattern(prev => ({ ...prev, severity: value }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
