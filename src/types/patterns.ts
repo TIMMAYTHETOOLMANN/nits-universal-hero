@@ -1,5 +1,26 @@
 import { RiskLevel } from './common'
 
+export interface AutonomousPattern {
+  id: string
+  name: string
+  violationType: string
+  keywords: string[]
+  confidence: number
+  performance: number
+  isActive: boolean
+  generatedAt: string
+  source: 'autonomous' | 'manual'
+}
+
+export interface TrainingStatus {
+  isActive: boolean
+  currentPhase: string
+  progress: number
+  patternsGenerated: number
+  lastTrainingTime: string | null
+  trainingLog: string[]
+}
+
 export type PatternCategory = 
   | 'insider-trading' 
   | 'esg-greenwashing' 

@@ -1,27 +1,19 @@
 import { useState, useCallback } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { AnalysisResult } from '../types/analysis'
+import { AutonomousPattern, TrainingStatus } from '../types/patterns'
 
-interface TrainingStatus {
-  isActive: boolean
-  currentPhase: string
-  progress: number
-  patternsGenerated: number
-  trainingLog: string[]
-  lastTrainingTime: string | null
+// Declare spark global
+declare global {
+  interface Window {
+    spark: {
+      llmPrompt: (strings: TemplateStringsArray, ...values: any[]) => string
+      llm: (prompt: string, modelName?: string, jsonMode?: boolean) => Promise<string>
+    }
+  }
 }
 
-interface AutonomousPattern {
-  id: string
-  name: string
-  violationType: string
-  keywords: string[]
-  confidence: number
-  performance: number
-  isActive: boolean
-  generatedAt: string
-  source: 'autonomous' | 'manual'
-}
+declare const spark: Window['spark']
 
 export const useAutonomousTraining = () => {
   const [trainingStatus, setTrainingStatus] = useKV<TrainingStatus>('training-status', {
@@ -29,155 +21,128 @@ export const useAutonomousTraining = () => {
     currentPhase: 'Idle',
     progress: 0,
     patternsGenerated: 0,
-    trainingLog: [],
-    lastTrainingTime: null
+    lastTrainingTime: null,
+    trainingLog: []
   })
 
   const [autonomousPatterns, setAutonomousPatterns] = useKV<AutonomousPattern[]>('autonomous-patterns', [])
   const [isTraining, setIsTraining] = useState(false)
 
   const updateTrainingStatus = useCallback((updates: Partial<TrainingStatus>) => {
-    setTrainingStatus((current) => {
-      const currentStatus = current || {
-        isActive: false,
-        currentPhase: 'Idle',
-        progress: 0,
-        patternsGenerated: 0,
-        trainingLog: [],
-        lastTrainingTime: null
-      }
-      return {
-        ...currentStatus,
-        ...updates
-      }
-    })
+    setTrainingStatus(current => ({ ...current!, ...updates }))
   }, [setTrainingStatus])
 
   const addToTrainingLog = useCallback((message: string) => {
-    const timestamp = new Date().toLocaleTimeString()
-    const logEntry = `[${timestamp}] ${message}`
-    
+    const timestamp = new Date().toISOString()
     updateTrainingStatus({
-      trainingLog: [...((trainingStatus?.trainingLog) || []).slice(-10), logEntry]
+      trainingLog: [...(trainingStatus?.trainingLog || []), `[${timestamp}] ${message}`]
     })
-  }, [trainingStatus, updateTrainingStatus])
+  }, [trainingStatus?.trainingLog, updateTrainingStatus])
 
   const generateAutonomousPatterns = useCallback(async (
     analysisResults: AnalysisResult,
     consoleLogger: (message: string) => void
   ) => {
     if (isTraining) return
-
     setIsTraining(true)
+
     updateTrainingStatus({
       isActive: true,
-      currentPhase: 'Analyzing Results',
+      currentPhase: 'Initializing AI Training',
       progress: 10
     })
 
-    consoleLogger('Starting autonomous pattern generation...')
-    addToTrainingLog('Initiating autonomous training sequence')
+    addToTrainingLog('Starting autonomous pattern generation...')
+    consoleLogger('AI Training: Starting autonomous pattern generation')
 
     try {
-      // Phase 1: Extract patterns from violations
       updateTrainingStatus({
-        currentPhase: 'Extracting Violation Patterns',
+        currentPhase: 'Analyzing Violations',
         progress: 25
       })
 
       if (!analysisResults.violations || analysisResults.violations.length === 0) {
         consoleLogger('No violations found for pattern generation')
-        addToTrainingLog('No violations available for pattern training')
+        addToTrainingLog('No violations found for pattern generation')
         return
       }
 
-      // Generate patterns using AI analysis
       updateTrainingStatus({
-        currentPhase: 'AI Pattern Analysis',
+        currentPhase: 'Generating AI Patterns',
         progress: 50
       })
 
-      const prompt = window.spark.llmPrompt`
-        Analyze these forensic violations and generate optimized detection patterns:
+      const prompt = spark.llmPrompt`
+        Analyze these SEC violations and generate 3-5 advanced detection patterns:
         
-        Violations: ${JSON.stringify(analysisResults.violations, null, 2)}
+        Violations: ${JSON.stringify(analysisResults.violations.slice(0, 3))}
         
-        For each unique violation type, create a pattern with:
-        1. Specific keywords that led to detection
+        Generate patterns that detect:
+        1. Keyword combinations and phrases
         2. Context patterns (surrounding text indicators)
-        3. Confidence scoring factors
-        4. Performance optimization suggestions
+        3. Timing and disclosure patterns
+        4. Performance optimization patterns
         
         Return JSON format:
         {
           "patterns": [
             {
               "name": "Pattern Name",
-              "violationType": "violation_type",
+              "violationType": "Type of violation",
               "keywords": ["keyword1", "keyword2"],
-              "contextPatterns": ["pattern1", "pattern2"],
-              "confidenceFactors": ["factor1", "factor2"]
+              "confidence": 0.85
             }
           ]
         }
       `
 
-      const aiResponse = await window.spark.llm(prompt, 'gpt-4o', true)
-      const patternData = JSON.parse(aiResponse)
-
-      if (!patternData.patterns || !Array.isArray(patternData.patterns)) {
-        throw new Error('Invalid pattern data from AI analysis')
-      }
+      const aiResponse = await spark.llm(prompt, "gpt-4o", true)
+      const aiPatterns = JSON.parse(aiResponse)
 
       updateTrainingStatus({
         currentPhase: 'Generating Optimized Patterns',
         progress: 75
       })
 
-      // Convert AI patterns to autonomous patterns
-      const newPatterns: AutonomousPattern[] = patternData.patterns.map((pattern: any, index: number) => ({
-        id: `auto_${Date.now()}_${index}`,
-        name: pattern.name || `Auto-Generated Pattern ${index + 1}`,
+      const newPatterns: AutonomousPattern[] = aiPatterns.patterns.map((pattern: any, index: number) => ({
+        id: `auto-${Date.now()}-${index}`,
+        name: pattern.name || `Auto Pattern ${index + 1}`,
+        violationType: pattern.violationType || 'General',
         keywords: pattern.keywords || [],
-        violationType: pattern.violationType || 'unknown',
-        confidence: 0.8,
-        performance: 0.0,
+        confidence: pattern.confidence || 0.8,
+        performance: 0.85,
         isActive: true,
         generatedAt: new Date().toISOString(),
         source: 'autonomous' as const
       }))
 
-      // Filter out duplicate patterns
       const existingPatterns = autonomousPatterns || []
       const uniquePatterns = newPatterns.filter(newPattern => 
         !existingPatterns.some(existingPattern => 
-          existingPattern.violationType === newPattern.violationType &&
           JSON.stringify(existingPattern.keywords.sort()) === JSON.stringify(newPattern.keywords.sort())
         )
       )
 
       if (uniquePatterns.length > 0) {
-        setAutonomousPatterns((current) => [...(current || []), ...uniquePatterns])
-        consoleLogger(`Generated ${uniquePatterns.length} new autonomous patterns`)
-        addToTrainingLog(`Successfully generated ${uniquePatterns.length} unique patterns`)
+        setAutonomousPatterns(current => [...(current || []), ...uniquePatterns])
+        addToTrainingLog(`Generated ${uniquePatterns.length} new patterns`)
+        consoleLogger(`AI Training: Generated ${uniquePatterns.length} new autonomous patterns`)
       } else {
-        consoleLogger('No new patterns generated - all patterns already exist')
-        addToTrainingLog('No new unique patterns identified')
+        addToTrainingLog('No new unique patterns generated')
+        consoleLogger('AI Training: No new unique patterns generated')
       }
 
-      const currentPatternsCount = (trainingStatus?.patternsGenerated) || 0
       updateTrainingStatus({
         currentPhase: 'Training Complete',
         progress: 100,
-        patternsGenerated: currentPatternsCount + uniquePatterns.length,
+        patternsGenerated: (trainingStatus?.patternsGenerated || 0) + uniquePatterns.length,
         lastTrainingTime: new Date().toISOString()
       })
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      consoleLogger(`Autonomous training failed: ${errorMessage}`)
       addToTrainingLog(`Training error: ${errorMessage}`)
-      
+      consoleLogger(`AI Training Error: ${errorMessage}`)
       updateTrainingStatus({
         currentPhase: 'Training Failed',
         progress: 0
@@ -187,25 +152,22 @@ export const useAutonomousTraining = () => {
         setIsTraining(false)
         updateTrainingStatus({
           isActive: false,
-          currentPhase: 'Idle',
           progress: 0
         })
       }, 2000)
     }
-  }, [isTraining, autonomousPatterns, trainingStatus, updateTrainingStatus, addToTrainingLog, setAutonomousPatterns])
+  }, [isTraining, autonomousPatterns, trainingStatus, setAutonomousPatterns, updateTrainingStatus, addToTrainingLog])
 
   const togglePattern = useCallback((patternId: string) => {
-    setAutonomousPatterns((current) =>
+    setAutonomousPatterns(current =>
       (current || []).map(pattern =>
-        pattern.id === patternId
-          ? { ...pattern, isActive: !pattern.isActive }
-          : pattern
+        pattern.id === patternId ? { ...pattern, isActive: !pattern.isActive } : pattern
       )
     )
   }, [setAutonomousPatterns])
 
   const deletePattern = useCallback((patternId: string) => {
-    setAutonomousPatterns((current) =>
+    setAutonomousPatterns(current =>
       (current || []).filter(pattern => pattern.id !== patternId)
     )
   }, [setAutonomousPatterns])

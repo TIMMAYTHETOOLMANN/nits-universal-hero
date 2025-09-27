@@ -4,27 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Robot, Brain, Target, Lightning, TrendUp, Clock } from '@phosphor-icons/react'
-
-interface TrainingStatus {
-  isActive: boolean
-  currentPhase: string
-  progress: number
-  patternsGenerated: number
-  lastTrainingTime: string | null
-  trainingLog: string[]
-}
-
-interface AutonomousPattern {
-  id: string
-  name: string
-  keywords: string[]
-  violationType: string
-  confidence: number
-  performance: number
-  generatedAt: string
-  isActive: boolean
-  source: 'autonomous' | 'manual'
-}
+import { AutonomousPattern, TrainingStatus } from '@/types/patterns'
 
 interface AutonomousTrainingModuleProps {
   trainingStatus: TrainingStatus
