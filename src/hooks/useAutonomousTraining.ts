@@ -7,40 +7,45 @@ interface TrainingStatus {
   currentPhase: string
   progress: number
   patternsGenerated: number
-  lastTrainingTime: string | null
   trainingLog: string[]
+  lastTrainingTime: string | null
 }
 
 interface AutonomousPattern {
   id: string
   name: string
-  keywords: string[]
   violationType: string
+  keywords: string[]
   confidence: number
   performance: number
-  generatedAt: string
   isActive: boolean
+  generatedAt: string
   source: 'autonomous' | 'manual'
 }
 
-const defaultTrainingStatus: TrainingStatus = {
-  isActive: false,
-  currentPhase: 'idle',
-  progress: 0,
-  patternsGenerated: 0,
-  lastTrainingTime: null,
-  trainingLog: []
-}
-
 export const useAutonomousTraining = () => {
-  const [trainingStatus, setTrainingStatus] = useKV<TrainingStatus>('autonomous-training-status', defaultTrainingStatus)
+  const [trainingStatus, setTrainingStatus] = useKV<TrainingStatus>('training-status', {
+    isActive: false,
+    currentPhase: 'Idle',
+    progress: 0,
+    patternsGenerated: 0,
+    trainingLog: [],
+    lastTrainingTime: null
+  })
+
   const [autonomousPatterns, setAutonomousPatterns] = useKV<AutonomousPattern[]>('autonomous-patterns', [])
   const [isTraining, setIsTraining] = useState(false)
 
-  // Helper function to ensure proper typing
   const updateTrainingStatus = useCallback((updates: Partial<TrainingStatus>) => {
     setTrainingStatus((current) => {
-      const currentStatus = current || defaultTrainingStatus
+      const currentStatus = current || {
+        isActive: false,
+        currentPhase: 'Idle',
+        progress: 0,
+        patternsGenerated: 0,
+        trainingLog: [],
+        lastTrainingTime: null
+      }
       return {
         ...currentStatus,
         ...updates
@@ -53,9 +58,9 @@ export const useAutonomousTraining = () => {
     const logEntry = `[${timestamp}] ${message}`
     
     updateTrainingStatus({
-      trainingLog: [...((trainingStatus?.trainingLog || []).slice(-10)), logEntry]
+      trainingLog: [...((trainingStatus?.trainingLog) || []).slice(-10), logEntry]
     })
-  }, [updateTrainingStatus, trainingStatus?.trainingLog])
+  }, [trainingStatus, updateTrainingStatus])
 
   const generateAutonomousPatterns = useCallback(async (
     analysisResults: AnalysisResult,
@@ -87,6 +92,11 @@ export const useAutonomousTraining = () => {
       }
 
       // Generate patterns using AI analysis
+      updateTrainingStatus({
+        currentPhase: 'AI Pattern Analysis',
+        progress: 50
+      })
+
       const prompt = window.spark.llmPrompt`
         Analyze these forensic violations and generate optimized detection patterns:
         
@@ -103,20 +113,14 @@ export const useAutonomousTraining = () => {
           "patterns": [
             {
               "name": "Pattern Name",
-              "violationType": "violation_flag",
+              "violationType": "violation_type",
               "keywords": ["keyword1", "keyword2"],
               "contextPatterns": ["pattern1", "pattern2"],
-              "confidenceFactors": ["factor1", "factor2"],
-              "estimatedPerformance": 0.85
+              "confidenceFactors": ["factor1", "factor2"]
             }
           ]
         }
       `
-
-      updateTrainingStatus({
-        currentPhase: 'AI Pattern Analysis',
-        progress: 50
-      })
 
       const aiResponse = await window.spark.llm(prompt, 'gpt-4o', true)
       const patternData = JSON.parse(aiResponse)
@@ -136,84 +140,74 @@ export const useAutonomousTraining = () => {
         name: pattern.name || `Auto-Generated Pattern ${index + 1}`,
         keywords: pattern.keywords || [],
         violationType: pattern.violationType || 'unknown',
-        confidence: pattern.estimatedPerformance || 0.8,
-        performance: 0, // Will be updated based on usage
-        generatedAt: new Date().toISOString(),
+        confidence: 0.8,
+        performance: 0.0,
         isActive: true,
+        generatedAt: new Date().toISOString(),
         source: 'autonomous' as const
       }))
 
-      // Add new patterns to existing ones (avoiding duplicates)
-      setAutonomousPatterns((current) => {
-        const existing = current || []
-        const filtered = newPatterns.filter(newPattern => 
-          !existing.some(existingPattern => 
-            existingPattern.violationType === newPattern.violationType &&
-            JSON.stringify(existingPattern.keywords.sort()) === JSON.stringify(newPattern.keywords.sort())
-          )
+      // Filter out duplicate patterns
+      const existingPatterns = autonomousPatterns || []
+      const uniquePatterns = newPatterns.filter(newPattern => 
+        !existingPatterns.some(existingPattern => 
+          existingPattern.violationType === newPattern.violationType &&
+          JSON.stringify(existingPattern.keywords.sort()) === JSON.stringify(newPattern.keywords.sort())
         )
-        return [...existing, ...filtered]
-      })
+      )
 
-      const currentStatus = trainingStatus || defaultTrainingStatus
+      if (uniquePatterns.length > 0) {
+        setAutonomousPatterns((current) => [...(current || []), ...uniquePatterns])
+        consoleLogger(`Generated ${uniquePatterns.length} new autonomous patterns`)
+        addToTrainingLog(`Successfully generated ${uniquePatterns.length} unique patterns`)
+      } else {
+        consoleLogger('No new patterns generated - all patterns already exist')
+        addToTrainingLog('No new unique patterns identified')
+      }
+
+      const currentPatternsCount = (trainingStatus?.patternsGenerated) || 0
       updateTrainingStatus({
         currentPhase: 'Training Complete',
         progress: 100,
-        patternsGenerated: currentStatus.patternsGenerated + newPatterns.length,
-        lastTrainingTime: new Date().toISOString(),
-        isActive: false
+        patternsGenerated: currentPatternsCount + uniquePatterns.length,
+        lastTrainingTime: new Date().toISOString()
       })
 
-      consoleLogger(`Generated ${newPatterns.length} autonomous patterns`)
-      addToTrainingLog(`Successfully generated ${newPatterns.length} new patterns`)
-
-      // Reset progress after completion
-      setTimeout(() => {
-        updateTrainingStatus({
-          progress: 0,
-          currentPhase: 'idle'
-        })
-      }, 3000)
-
     } catch (error) {
-      console.error('Autonomous training failed:', error)
-      consoleLogger(`Training failed: ${error}`)
-      addToTrainingLog(`Training failed: ${error}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      consoleLogger(`Autonomous training failed: ${errorMessage}`)
+      addToTrainingLog(`Training error: ${errorMessage}`)
       
       updateTrainingStatus({
-        isActive: false,
-        currentPhase: 'Error',
+        currentPhase: 'Training Failed',
         progress: 0
       })
     } finally {
-      setIsTraining(false)
+      setTimeout(() => {
+        setIsTraining(false)
+        updateTrainingStatus({
+          isActive: false,
+          currentPhase: 'Idle',
+          progress: 0
+        })
+      }, 2000)
     }
-  }, [isTraining, updateTrainingStatus, setAutonomousPatterns, addToTrainingLog, trainingStatus])
+  }, [isTraining, autonomousPatterns, trainingStatus, updateTrainingStatus, addToTrainingLog, setAutonomousPatterns])
 
   const togglePattern = useCallback((patternId: string) => {
-    setAutonomousPatterns((current) => {
-      return (current || []).map(pattern => 
-        pattern.id === patternId 
+    setAutonomousPatterns((current) =>
+      (current || []).map(pattern =>
+        pattern.id === patternId
           ? { ...pattern, isActive: !pattern.isActive }
           : pattern
       )
-    })
+    )
   }, [setAutonomousPatterns])
 
   const deletePattern = useCallback((patternId: string) => {
-    setAutonomousPatterns((current) => {
-      return (current || []).filter(pattern => pattern.id !== patternId)
-    })
-  }, [setAutonomousPatterns])
-
-  const updatePatternPerformance = useCallback((patternId: string, performance: number) => {
-    setAutonomousPatterns((current) => {
-      return (current || []).map(pattern => 
-        pattern.id === patternId 
-          ? { ...pattern, performance }
-          : pattern
-      )
-    })
+    setAutonomousPatterns((current) =>
+      (current || []).filter(pattern => pattern.id !== patternId)
+    )
   }, [setAutonomousPatterns])
 
   const getActivePatterns = useCallback(() => {
@@ -221,19 +215,19 @@ export const useAutonomousTraining = () => {
   }, [autonomousPatterns])
 
   const clearTrainingLog = useCallback(() => {
-    updateTrainingStatus({ trainingLog: [] })
+    updateTrainingStatus({
+      trainingLog: []
+    })
   }, [updateTrainingStatus])
 
   return {
-    trainingStatus: trainingStatus || defaultTrainingStatus,
+    trainingStatus,
     autonomousPatterns: autonomousPatterns || [],
     isTraining,
     generateAutonomousPatterns,
     togglePattern,
     deletePattern,
-    updatePatternPerformance,
     getActivePatterns,
-    clearTrainingLog,
-    addToTrainingLog
+    clearTrainingLog
   }
 }

@@ -131,7 +131,7 @@ function App() {
             AI Patterns: {autonomousTraining.autonomousPatterns.length} 
             ({autonomousTraining.getActivePatterns().length} active)
           </div>
-          {autonomousTraining.trainingStatus.isActive && (
+          {autonomousTraining.trainingStatus?.isActive && (
             <Badge variant="outline" className="text-xs">
               <Robot size={10} className="mr-1" />
               Auto-Training Active
@@ -200,7 +200,14 @@ function App() {
 
               {/* Embedded Autonomous Training Module */}
               <AutonomousTrainingModule
-                trainingStatus={autonomousTraining.trainingStatus}
+                trainingStatus={autonomousTraining.trainingStatus || {
+                  isActive: false,
+                  currentPhase: 'Idle',
+                  progress: 0,
+                  patternsGenerated: 0,
+                  lastTrainingTime: null,
+                  trainingLog: []
+                }}
                 autonomousPatterns={autonomousTraining.autonomousPatterns}
                 isTraining={autonomousTraining.isTraining}
                 onTogglePattern={autonomousTraining.togglePattern}
