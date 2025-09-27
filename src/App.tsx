@@ -2735,7 +2735,7 @@ SEC Release Reference: ${results.penaltyMatrix?.sec_release_version || '2025 SEC
 
 ═══════════════════════════════════════════════════════════════════
                          EXECUTIVE SUMMARY
-═══════════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════���════
 
 Total Documents Analyzed: ${results.summary.totalDocs}
 Overall Risk Assessment: ${results.summary.riskScore.toFixed(1)}/10.0
@@ -2859,7 +2859,7 @@ ${results.anomalies.map((a, i) => `${i + 1}. ${a.type.toUpperCase()}
 
 ═══════════════════════════════════════════════════════════════════
                    MODULE PERFORMANCE ANALYSIS
-═══════════════════════════════════════════════════════════════════
+═══════════════════════════════���═══════════════════════════════════
 
 ${results.modules.map((m, i) => `${i + 1}. ${m.name}
    Documents Processed: ${m.processed}
@@ -4208,28 +4208,19 @@ END OF REPORT`
                             <div className="font-medium text-accent">Documented Evidence:</div>
                             {violation.evidence.map((evidence, evidenceIdx) => (
                               <div key={evidenceIdx} className="border-l-4 border-accent/30 pl-4 py-2 bg-muted/30 rounded-r">
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <div className="font-medium text-sm">Evidence #{evidenceIdx + 1}</div>
-                                    <div className="flex items-center gap-2">
-                                      {/* Source File Badge */}
-                                      {(evidence as any).source_file && (
-                                        <Badge variant="default" className="text-xs bg-primary/20 text-primary border-primary/30">
-                                          {(evidence as any).source_file}
-                                        </Badge>
-                                      )}
-                                      <Badge variant="outline" className="text-xs">
-                                        {evidence.section_reference}
-                                      </Badge>
-                                      {evidence.page_number && (
-                                        <Badge variant="secondary" className="text-xs">
-                                          Page {evidence.page_number}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="font-medium text-sm">Evidence #{evidenceIdx + 1}</div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {evidence.section_reference}
+                                  </Badge>
+                                  {evidence.page_number && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Page {evidence.page_number}
+                                    </Badge>
+                                  )}
+                                </div>
 
-                                  {/* Financial Impact Display */}
+                                {/* Financial Impact Display */}
                                   {(evidence as any).financial_impact && (
                                     <div className="p-3 bg-warning-orange/10 border border-warning-orange/20 rounded">
                                       <div className="text-xs font-medium text-warning-orange mb-2">Financial Impact Analysis:</div>
@@ -4331,7 +4322,6 @@ END OF REPORT`
                                       </ul>
                                     </div>
                                   )}
-                                </div>
                               </div>
                             ))}
                           </div>
@@ -4347,8 +4337,8 @@ END OF REPORT`
                 <Card className="border-warning-orange/30">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Scales size={20} className="text-warning-orange" />
-                      SEC Civil Monetary Penalty Calculations
+                      <CurrencyDollar size={20} className="text-warning-orange" />
+                      SEC Penalty Calculations - Evidence-Based Amounts
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
