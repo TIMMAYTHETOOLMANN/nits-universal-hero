@@ -370,4 +370,149 @@ export class PenaltyCalculator {
     
     return Math.min(10.0, adjustedScore)
   }
+
+  exportPenaltyMatrix(penaltyMatrix: PenaltyMatrix, format: string): void {
+    const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-')
+    
+    try {
+      switch (format.toLowerCase()) {
+        case 'csv': {
+          const csvContent = this.generateCSVContent(penaltyMatrix)
+          this.downloadFile(csvContent, `SEC_Penalty_Matrix_${timestamp}.csv`, 'text/csv')
+          break
+        }
+        case 'json': {
+          const jsonContent = JSON.stringify(penaltyMatrix, null, 2)
+          this.downloadFile(jsonContent, `SEC_Penalty_Analysis_${timestamp}.json`, 'application/json')
+          break
+        }
+        case 'txt': {
+          const txtContent = this.generateExecutiveReport(penaltyMatrix)
+          this.downloadFile(txtContent, `SEC_Executive_Report_${timestamp}.txt`, 'text/plain')
+          break
+        }
+        case 'complete': {
+          const completeContent = JSON.stringify({
+            penalty_matrix: penaltyMatrix,
+            export_timestamp: new Date().toISOString(),
+            export_type: 'complete_package',
+            metadata: {
+              total_exposure: penaltyMatrix.grand_total,
+              violation_count: penaltyMatrix.total_violations,
+              document_count: Object.keys(penaltyMatrix.documents).length,
+              sec_version: penaltyMatrix.sec_release_version
+            }
+          }, null, 2)
+          this.downloadFile(completeContent, `SEC_Complete_Package_${timestamp}.json`, 'application/json')
+          break
+        }
+        default:
+          throw new Error(`Unsupported export format: ${format}`)
+      }
+    } catch (error) {
+      console.error('Export failed:', error)
+      throw new PenaltyCalculationError(`Export failed: ${error}`)
+    }
+  }
+
+  private generateCSVContent(penaltyMatrix: PenaltyMatrix): string {
+    const headers = [
+      'Document',
+      'Violation Type',
+      'Actor Type',
+      'Count',
+      'Unit Penalty',
+      'Subtotal',
+      'SEC Citation',
+      'Enhancement Applied',
+      'Evidence Based'
+    ]
+    
+    const rows = [headers.join(',')]
+    
+    for (const [document, calculations] of Object.entries(penaltyMatrix.documents)) {
+      for (const calc of calculations) {
+        const row = [
+          `"${document}"`,
+          `"${calc.violation_flag}"`,
+          `"${calc.actor_type}"`,
+          calc.count.toString(),
+          (calc.unit_penalty || 0).toString(),
+          (calc.subtotal || 0).toString(),
+          `"${calc.sec_citation || 'N/A'}"`,
+          calc.enhancement_applied ? 'Yes' : 'No',
+          calc.evidence_based ? 'Yes' : 'No'
+        ]
+        rows.push(row.join(','))
+      }
+    }
+    
+    return rows.join('\n')
+  }
+
+  private generateExecutiveReport(penaltyMatrix: PenaltyMatrix): string {
+    const report = [
+      'SEC CIVIL MONETARY PENALTY EXPOSURE ANALYSIS',
+      '=' .repeat(50),
+      '',
+      `Analysis Date: ${new Date(penaltyMatrix.calculation_timestamp).toLocaleString()}`,
+      `SEC Release Version: ${penaltyMatrix.sec_release_version}`,
+      '',
+      'EXECUTIVE SUMMARY',
+      '-'.repeat(20),
+      `Total Penalty Exposure: $${penaltyMatrix.grand_total.toLocaleString()}`,
+      `Total Violations: ${penaltyMatrix.total_violations}`,
+      `Documents Analyzed: ${Object.keys(penaltyMatrix.documents).length}`,
+      '',
+      'DOCUMENT BREAKDOWN',
+      '-'.repeat(20)
+    ]
+    
+    for (const [document, calculations] of Object.entries(penaltyMatrix.documents)) {
+      const documentTotal = calculations.reduce((sum, calc) => sum + (calc.subtotal || 0), 0)
+      report.push(`\n${document}: $${documentTotal.toLocaleString()}`)
+      
+      for (const calc of calculations) {
+        report.push(`  • ${calc.violation_flag}: $${(calc.subtotal || 0).toLocaleString()} (${calc.count} instances)`)
+        if (calc.enhancement_applied) {
+          report.push(`    Enhancement: ${calc.enhancement_justification}`)
+        }
+      }
+    }
+    
+    if (penaltyMatrix.missing_statute_mappings.length > 0) {
+      report.push('\nMISSING STATUTE MAPPINGS')
+      report.push('-'.repeat(20))
+      for (const mapping of penaltyMatrix.missing_statute_mappings) {
+        report.push(`• ${mapping}`)
+      }
+    }
+    
+    return report.join('\n')
+  }
+
+  private downloadFile(content: string, filename: string, mimeType: string): void {
+    try {
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      console.log(`✓ Downloaded: ${filename}`)
+    } catch (error) {
+      console.error('Download failed:', error)
+      
+      // Fallback: copy to clipboard
+      navigator.clipboard?.writeText(content).then(() => {
+        console.log('✓ Content copied to clipboard as fallback')
+      }).catch(() => {
+        console.error('✗ Both download and clipboard copy failed')
+      })
+    }
+  }
 }

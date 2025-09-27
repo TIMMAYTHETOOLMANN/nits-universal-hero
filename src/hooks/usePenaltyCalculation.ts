@@ -5,6 +5,7 @@ import { PenaltyCalculator } from '../services/penaltyCalculator'
 
 export interface UsePenaltyCalculationReturn {
   penaltyCalculating: boolean
+  isCalculating: boolean // Alias for backward compatibility
   penaltyMatrix: PenaltyMatrix | null
   secPenaltyData: Record<string, SEC_Penalty_Data>
   lastSecUpdate: string | null
@@ -12,6 +13,7 @@ export interface UsePenaltyCalculationReturn {
   calculatePenalties: (violations: ViolationDetection[], onLog: (message: string) => void) => Promise<void>
   clearPenaltyMatrix: () => void
   refreshSecData: (onLog: (message: string) => void) => Promise<void>
+  exportPenaltyMatrix: (format: string) => void
   
   // Utility functions
   getTotalExposure: () => number
@@ -89,6 +91,13 @@ export const usePenaltyCalculation = (): UsePenaltyCalculationReturn => {
     return penaltyMatrix?.missing_statute_mappings || []
   }, [penaltyMatrix])
 
+  const exportPenaltyMatrix = useCallback((format: string) => {
+    if (!penaltyMatrix) return
+    
+    const penaltyCalculator = PenaltyCalculator.getInstance()
+    penaltyCalculator.exportPenaltyMatrix(penaltyMatrix, format)
+  }, [penaltyMatrix])
+
   const calculateWeightedRiskScore = useCallback((baseScore: number) => {
     if (!penaltyMatrix) return baseScore
     
@@ -98,13 +107,15 @@ export const usePenaltyCalculation = (): UsePenaltyCalculationReturn => {
 
   return {
     penaltyCalculating,
+    isCalculating: penaltyCalculating, // Alias for backward compatibility
     penaltyMatrix,
     secPenaltyData: secPenaltyData || {},
-    lastSecUpdate,
+    lastSecUpdate: lastSecUpdate || null,
     
     calculatePenalties,
     clearPenaltyMatrix,
     refreshSecData,
+    exportPenaltyMatrix,
     
     // Utility functions
     getTotalExposure,

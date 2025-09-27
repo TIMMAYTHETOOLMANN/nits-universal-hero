@@ -30,33 +30,40 @@ Forensic document analysis traditionally relies on manual review and static patt
 
 ## Essential Features
 
-### 1. AI-Enhanced Document Analysis Engine
+### 1. AI-Enhanced Document Analysis Engine with Embedded Autonomous Training
 - Dual-zone upload system (SEC Regulatory + Public Glamour)
 - 6 specialized detection modules with AI integration
 - Real-time natural language processing with sentiment analysis
 - Cross-document triangulation with linguistic inconsistency detection
-- Custom pattern integration with confidence scoring
+- **Embedded autonomous pattern training mini-module within analysis tab**
+- **Self-reporting, self-adapting forensic training with real-time status**
+- **Continuous pattern improvement without manual intervention**
+- **Training output monitoring and performance tracking**
 
-### 2. Autonomous Pattern Training System
-- Real-time pattern generation based on analysis results
-- Automatic optimization of underperforming patterns
-- Continuous learning from analysis outcomes
-- Pattern performance tracking and success rate monitoring
-- Autonomous training scheduling with user control
+### 2. Financial Matrix Violation Dashboard (Replaces Pattern Training Tab)
+- **Hyper-specific violation findings with surgical accuracy**
+- **Exact SEC penalty calculations using current 2025 official amounts**
+- **Detailed violation breakdown with specific document locations**
+- **Willful vs. non-willful violation classification**
+- **Systemic vs. isolated violation analysis**
+- **Per-violation penalty calculations with exact references**
+- **Complete violation fee matrix with document-specific breakdown**
+- **Real-time SEC statute mapping with current penalty amounts**
 
-### 3. SEC Penalty Calculation Engine
+### 3. SEC Penalty Calculation Engine (Enhanced for Surgical Accuracy)
 - Real-time download of official SEC "Adjustments to Civil Monetary Penalty Amounts" releases
-- Exact penalty amount lookup from authoritative SEC sources
-- Violation-to-statute mapping with current 2025 adjustments
-- Per-document and cumulative penalty calculations
+- **Exact penalty amount lookup with zero estimation or ranges**
+- **Surgical accuracy in violation-to-statute mapping**
+- **Document-specific violation location references**
+- **Exact quote extraction and section identification**
 - Natural person vs. corporate entity penalty differentiation
 
-### 4. Enhanced Export System with Download Optimization
-- Multiple format support (TXT, CSV, JSON, Complete Package)
+### 4. Enhanced Export System with Precision Reporting
+- Multiple format support focused on penalty matrix accuracy
+- **Surgical breakdown reports with exact violation locations**
+- **Current violation fee references with SEC citation sources**
 - Enhanced browser compatibility with fallback mechanisms
 - Clear download location guidance and status feedback
-- Clipboard backup for failed downloads
-- Comprehensive penalty calculation reports
 
 ## Design Direction
 

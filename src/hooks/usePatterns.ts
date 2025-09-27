@@ -208,10 +208,10 @@ export const usePatterns = (): UsePatternReturn => {
     customPatterns: customPatterns || [],
     newPattern,
     testingPattern,
-    autoTrainingEnabled,
+    autoTrainingEnabled: autoTrainingEnabled || false,
     trainingInProgress,
     trainingLog,
-    lastAutoTraining,
+    lastAutoTraining: lastAutoTraining || null,
     
     // Pattern management
     setNewPattern,

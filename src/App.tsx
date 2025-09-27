@@ -2,26 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toaster } from '@/components/ui/sonner'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Target, Eye, Shield, Robot } from '@phosphor-icons/react'
+import { Upload, Calculator, Eye, Shield, Robot } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 // Import modular components
 import { DocumentUploadZone } from './components/document/DocumentUploadZone'
 import { AnalysisProgress } from './components/document/AnalysisProgress'
-import { PatternCreator } from './components/patterns/PatternCreator'
-import { PatternList } from './components/patterns/PatternList'
+import { AutonomousTrainingModule } from './components/training/AutonomousTrainingModule'
 import { AnalysisSummary } from './components/results/AnalysisSummary'
+import { FinancialMatrix } from './components/financial/FinancialMatrix'
 import { SystemConsole } from './components/console/SystemConsole'
 
 // Import custom hooks
 import { useAnalysis } from './hooks/useAnalysis'
 import { useFileManagement } from './hooks/useFileManagement'
-import { usePatterns } from './hooks/usePatterns'
+import { useAutonomousTraining } from './hooks/useAutonomousTraining'
 import { usePenaltyCalculation } from './hooks/usePenaltyCalculation'
 import { useConsole } from './hooks/useConsole'
-
-// Import types
-import { CustomPattern } from './types/patterns'
 
 // Declare spark global
 declare global {
@@ -39,16 +36,16 @@ function App() {
   // Initialize all hooks
   const analysis = useAnalysis()
   const fileManagement = useFileManagement()
-  const patterns = usePatterns()
+  const autonomousTraining = useAutonomousTraining()
   const penalties = usePenaltyCalculation()
   const console = useConsole()
 
   // Auto-generate patterns after successful analysis
   useEffect(() => {
-    if (analysis.results && patterns.autoTrainingEnabled && !patterns.trainingInProgress) {
-      patterns.generateAutonomousPatterns(analysis.results, console.addToConsole)
+    if (analysis.results && !autonomousTraining.isTraining) {
+      autonomousTraining.generateAutonomousPatterns(analysis.results, console.addToConsole)
     }
-  }, [analysis.results, patterns.autoTrainingEnabled, patterns.trainingInProgress])
+  }, [analysis.results, autonomousTraining.isTraining])
 
   // Calculate penalties when violations are detected
   useEffect(() => {
@@ -58,10 +55,28 @@ function App() {
   }, [analysis.results?.violations])
 
   const handleAnalysisExecution = () => {
+    // Convert autonomous patterns to the format expected by analysis
+    const convertedPatterns = autonomousTraining.getActivePatterns().map(pattern => ({
+      ...pattern,
+      description: `Auto-generated pattern for ${pattern.violationType}`,
+      category: 'custom' as const,
+      rules: pattern.keywords.map(keyword => `content contains "${keyword}"`),
+      severity: 'medium' as const,
+      isActive: pattern.isActive,
+      createdAt: pattern.generatedAt,
+      lastTested: null as string | null,
+      testResults: {
+        totalTests: 0,
+        successRate: pattern.performance,
+        falsePositives: 0,
+        lastTestDate: null as string | null
+      }
+    }))
+
     analysis.executeAnalysis(
       fileManagement.secFiles,
       fileManagement.glamourFiles,
-      patterns.customPatterns,
+      convertedPatterns,
       console.addToConsole
     )
   }
@@ -82,35 +97,11 @@ function App() {
     console.addToConsole(result.message)
   }
 
-  const handleCreatePattern = async () => {
-    const result = await patterns.createCustomPattern()
+  const handleExportMatrix = (format: string) => {
+    if (!penalties.penaltyMatrix) return
     
-    if (result.success) {
-      toast.success(result.message)
-    } else {
-      toast.error(result.message)
-    }
-    
-    console.addToConsole(result.message)
-    return result
-  }
-
-  const handleTestPattern = (id: string) => {
-    patterns.testPattern(id, console.addToConsole)
-  }
-
-  const handleTogglePattern = (id: string) => {
-    patterns.togglePattern(id)
-    const pattern = patterns.getPatternById(id)
-    const action = pattern?.isActive ? 'activated' : 'deactivated'
-    console.addToConsole(`Pattern "${pattern?.name}" ${action}`)
-  }
-
-  const handleDeletePattern = (id: string) => {
-    const pattern = patterns.getPatternById(id)
-    patterns.deletePattern(id)
-    console.addToConsole(`Pattern "${pattern?.name}" deleted`)
-    toast.success(`Pattern deleted: ${pattern?.name}`)
+    penalties.exportPenaltyMatrix(format)
+    console.addToConsole(`Exported penalty matrix in ${format.toUpperCase()} format`)
   }
 
   const canExecuteAnalysis = fileManagement.getTotalFileCount() > 0
@@ -127,7 +118,7 @@ function App() {
           </Badge>
         </h1>
         <p className="text-muted-foreground">
-          Advanced forensic analysis with AI-powered pattern detection and SEC penalty calculations
+          Advanced forensic analysis with autonomous AI pattern training and surgical SEC penalty calculations
         </p>
         
         {/* System Status */}
@@ -137,13 +128,19 @@ function App() {
             ({fileManagement.secFiles.length} SEC, {fileManagement.glamourFiles.length} Glamour)
           </div>
           <div>
-            Patterns: {patterns.customPatterns.length} 
-            ({patterns.getActivePatterns().length} active)
+            AI Patterns: {autonomousTraining.autonomousPatterns.length} 
+            ({autonomousTraining.getActivePatterns().length} active)
           </div>
-          {patterns.autoTrainingEnabled && (
+          {autonomousTraining.trainingStatus.isActive && (
             <Badge variant="outline" className="text-xs">
               <Robot size={10} className="mr-1" />
-              Auto-Training Enabled
+              Auto-Training Active
+            </Badge>
+          )}
+          {penalties.penaltyMatrix && (
+            <Badge variant="outline" className="text-xs text-orange-400">
+              <Calculator size={10} className="mr-1" />
+              ${penalties.penaltyMatrix.grand_total.toLocaleString()} Total Exposure
             </Badge>
           )}
         </div>
@@ -155,11 +152,13 @@ function App() {
             <Upload size={16} />
             Document Analysis
           </TabsTrigger>
-          <TabsTrigger value="patterns" className="flex items-center gap-2">
-            <Target size={16} />
-            Pattern Training
-            {patterns.autoTrainingEnabled && patterns.trainingInProgress && (
-              <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+          <TabsTrigger value="financial" className="flex items-center gap-2">
+            <Calculator size={16} />
+            Financial Matrix
+            {penalties.penaltyMatrix && (
+              <Badge variant="outline" className="text-xs ml-1">
+                ${(penalties.penaltyMatrix.grand_total / 1000000).toFixed(1)}M
+              </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="results" className="flex items-center gap-2" disabled={!analysis.results}>
@@ -198,6 +197,16 @@ function App() {
                 onExecute={handleAnalysisExecution}
                 canExecute={canExecuteAnalysis}
               />
+
+              {/* Embedded Autonomous Training Module */}
+              <AutonomousTrainingModule
+                trainingStatus={autonomousTraining.trainingStatus}
+                autonomousPatterns={autonomousTraining.autonomousPatterns}
+                isTraining={autonomousTraining.isTraining}
+                onTogglePattern={autonomousTraining.togglePattern}
+                onDeletePattern={autonomousTraining.deletePattern}
+                onClearLog={autonomousTraining.clearTrainingLog}
+              />
             </div>
 
             {/* Right Column - Console */}
@@ -206,72 +215,25 @@ function App() {
                 consoleLog={console.consoleLog}
                 onClear={console.clearConsole}
                 onExport={console.exportConsoleLog}
-                maxHeight="600px"
+                maxHeight="800px"
               />
             </div>
           </div>
         </TabsContent>
 
-        {/* Pattern Training Tab */}
-        <TabsContent value="patterns">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column - Pattern Creator */}
-            <div className="space-y-6">
-              <PatternCreator
-                newPattern={patterns.newPattern}
-                onPatternChange={patterns.setNewPattern}
-                onCreatePattern={handleCreatePattern}
-              />
-
-              {/* Auto-Training Panel */}
-              <div className="bg-muted/30 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium flex items-center gap-2">
-                    <Robot size={16} />
-                    Autonomous Pattern Training
-                  </h3>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={patterns.autoTrainingEnabled}
-                      onChange={(e) => patterns.setAutoTrainingEnabled(e.target.checked)}
-                      className="rounded"
-                    />
-                    <span className="text-sm">Enable Auto-Training</span>
-                  </label>
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-3">
-                  Automatically generate and optimize patterns based on analysis results
-                </p>
-                
-                {patterns.lastAutoTraining && (
-                  <div className="text-xs text-muted-foreground">
-                    Last training: {new Date(patterns.lastAutoTraining).toLocaleString()}
-                  </div>
-                )}
-                
-                {patterns.trainingLog.length > 0 && (
-                  <div className="mt-3 bg-background rounded p-2 text-xs max-h-32 overflow-y-auto">
-                    {patterns.trainingLog.slice(-5).map((log, i) => (
-                      <div key={i} className="text-muted-foreground">{log}</div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Pattern List */}
-            <div>
-              <PatternList
-                patterns={patterns.customPatterns}
-                testingPattern={patterns.testingPattern}
-                onTogglePattern={handleTogglePattern}
-                onTestPattern={handleTestPattern}
-                onDeletePattern={handleDeletePattern}
-              />
-            </div>
-          </div>
+        {/* Financial Matrix Tab */}
+        <TabsContent value="financial">
+          <FinancialMatrix
+            violations={analysis.results?.violations || []}
+            penaltyMatrix={penalties.penaltyMatrix}
+            isCalculating={penalties.isCalculating}
+            onExportMatrix={handleExportMatrix}
+            onRecalculate={() => {
+              if (analysis.results?.violations) {
+                penalties.calculatePenalties(analysis.results.violations, console.addToConsole)
+              }
+            }}
+          />
         </TabsContent>
 
         {/* Results Dashboard Tab */}
