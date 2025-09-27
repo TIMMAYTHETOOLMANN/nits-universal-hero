@@ -3536,7 +3536,7 @@ END OF REPORT`
                             </div>
                           </div>
                         ))}
-                      </div>
+                      </CollapsibleContent>
                     </Collapsible>
                   </CardContent>
                 </Card>
