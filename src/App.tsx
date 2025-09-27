@@ -2188,16 +2188,9 @@ function App() {
       return
     }
 
-    // Generate STABLE deterministic hash from file names and sizes for consistent results
+    // Generate stable hash from files for consistent analysis
     const generateStableHash = (files: FileItem[]): string => {
-      // Sort files by name to ensure consistent ordering
-      const sortedFiles = [...files].sort((a, b) => a.name.localeCompare(b.name))
-      
-      // Create hash from name and size only (avoid timestamps)
-      const hashString = sortedFiles
-        .map(f => `${f.name.toLowerCase()}_${f.size}`)
-        .join('|')
-      
+      const hashString = files.map(f => `${f.name}_${f.size}`).sort().join('|')
       // Simple but deterministic hash function
       let hash = 0
       for (let i = 0; i < hashString.length; i++) {
@@ -2265,15 +2258,7 @@ function App() {
       // Perform enhanced NLP analysis during phase 2
       if (phases.indexOf(phase) === 1) {
         const documentContext = `
-          SEC Documents: ${(secFiles || []).map(f => f.name).join(', ')}
-          Public Documents: ${(glamourFiles || []).map(f => f.name).join(', ')}
-          Custom Patterns: ${activeCustomPatterns.map(p => p.name).join(', ')}
-          Analysis Context: MAXIMUM INTENSITY Corporate forensic investigation. ZERO TOLERANCE approach - detect ALL violations including:
-          - Multi-layered insider trading schemes and coordination patterns
-          - Complex ESG greenwashing with quantitative analysis gaps
-          - Sophisticated financial engineering and non-GAAP manipulation
-          - Subtle disclosure omissions and strategic information withholding
-          - Intricate cross-document inconsistencies and narrative shifts
+          Advanced forensic analysis targeting:
           - Advanced temporal manipulation and timeline anomalies
           - Executive compensation anomalies and benefit conflicts
           - Hidden litigation risk factors and defensive language
@@ -2390,12 +2375,12 @@ function App() {
           fileViolationMap.set(file.name, {
             expectedViolations: ['disclosure_omission'],
             profitAmounts: [],
-            penaltyMultipliers: [1.2],
+            penaltyMultipliers: [1.1],
             documentHash: fileHash
           })
         }
       })
-      
+
       // Map public files to specific violation types with CONSISTENT mapping
       ;(glamourFiles || []).forEach((file, index) => {
         const fileHash = generateFileHash(file, index)
@@ -2486,7 +2471,7 @@ function App() {
             let profitAmount: number | undefined = undefined
             
             // Generate CONSISTENT hash-based amounts using stable hash
-            const documentHashNumber = parseInt(mapping.documentHash, 36) // Use stable numeric hash
+            const documentHashNumber = parseInt(mapping.documentHash, 36) // Use stable numeric hash from combined hash
             
             if (violationType === 'insider_trading' && mapping.profitAmounts.length > 0) {
               actorType = 'natural_person'
@@ -2499,8 +2484,8 @@ function App() {
                 page_number: 1 + (documentHashNumber % 5), // Consistent page numbers
                 section_reference: `${fileName} - Transaction Details Section`,
                 context_before: 'The reporting person acquired or disposed of the following non-derivative securities during the period covered by this report',
-                context_after: 'representing transactions executed with knowledge of material nonpublic information regarding quarterly earnings',
-                rule_violated: '15 U.S.C. 78u-1(a) - Insider Trading Violations',
+                context_after: 'based on material nonpublic information regarding quarterly earnings',
+                rule_violated: '17 CFR 240.10b5-1 - Insider Trading Rule',
                 legal_standard: 'Trading on material nonpublic information with profit realization',
                 materiality_threshold_met: true,
                 corroborating_evidence: [
@@ -2542,7 +2527,7 @@ function App() {
                   `Total understatement: $${understatementAmount.toLocaleString()} (${((understatementAmount / totalComp) * 100).toFixed(1)}%)`,
                   `Reported: $${(reportedComp / 1000).toFixed(0)}K vs Actual: $${(totalComp / 1000).toFixed(0)}K`
                 ],
-                hyperlink_anchor: `#${fileName}_SummaryCompTable`,
+                hyperlink_anchor: `#${fileName}_CompensationTable`,
                 timestamp_extracted: new Date().toISOString(),
                 confidence_level: 0.96,
                 manual_review_required: false
@@ -2686,7 +2671,7 @@ function App() {
     const filesHashNumber = parseInt(filesHash, 36) // Use stable numeric hash
     
     // CONSISTENT base risk calculation based on file types and content
-    let baseRiskScore = 6.0 // Minimum base risk
+    let baseRiskScore = 3.5 // Base risk starting point
     
     // Add CONSISTENT risk based on file types (deterministic)
     const secFileCount = (secFiles?.length || 0)
@@ -2694,10 +2679,9 @@ function App() {
     
     // SEC filing risk contributions (deterministic based on file types)
     secFiles?.forEach(file => {
-      if (file.name.toLowerCase().includes('10-k')) baseRiskScore += 1.2 // Higher risk for annual reports
+      if (file.name.toLowerCase().includes('10-k')) baseRiskScore += 1.2 // High risk for annual
       else if (file.name.toLowerCase().includes('10-q')) baseRiskScore += 0.8 // Medium risk for quarterly
       else if (file.name.toLowerCase().includes('def') || file.name.toLowerCase().includes('proxy')) baseRiskScore += 1.0 // Compensation risk
-      else if (file.name.toLowerCase().includes('form') && (file.name.includes('4') || file.name.includes('5'))) baseRiskScore += 1.5 // High insider trading risk
       else if (file.name.toLowerCase().includes('8-k')) baseRiskScore += 0.9 // Event disclosure risk
       else baseRiskScore += 0.5 // General SEC filing risk
     })
@@ -2739,8 +2723,7 @@ function App() {
       activeCustomPatternsCount * 2 : 0 // Consistent custom pattern results
     
     // CONSISTENT cross-references based on file combinations
-    const deterministicCrossReferences = 50 + (totalDocuments * 8) + 
-      (secFileCount * glamourFileCount * 5) + // Cross-document references
+    const deterministicCrossReferences = Math.max(3, totalDocuments * 8) + 
       (activeCustomPatternsCount * 4) // Pattern-based references
 
     const mockResults: AnalysisResult = {
