@@ -2682,7 +2682,6 @@ function App() {
       if (file.name.toLowerCase().includes('10-k')) baseRiskScore += 1.2 // High risk for annual
       else if (file.name.toLowerCase().includes('10-q')) baseRiskScore += 0.8 // Medium risk for quarterly
       else if (file.name.toLowerCase().includes('def') || file.name.toLowerCase().includes('proxy')) baseRiskScore += 1.0 // Compensation risk
-      else if (file.name.toLowerCase().includes('8-k')) baseRiskScore += 0.9 // Event disclosure risk
       else baseRiskScore += 0.5 // General SEC filing risk
     })
     
@@ -2693,7 +2692,7 @@ function App() {
       else baseRiskScore += 0.4 // General public document risk
     })
     
-    // Cross-document amplification (consistent based on file combinations)
+    
     if (secFileCount > 0 && glamourFileCount > 0) {
       baseRiskScore += (secFileCount * glamourFileCount * 0.1) // Multiplicative cross-document risk
     }
@@ -2723,9 +2722,8 @@ function App() {
       activeCustomPatternsCount * 2 : 0 // Consistent custom pattern results
     
     // CONSISTENT cross-references based on file combinations
-    const deterministicCrossReferences = Math.max(3, totalDocuments * 8) + 
-      (activeCustomPatternsCount * 4) // Pattern-based references
-
+    const deterministicCrossReferences = Math.max(3, totalDocuments * 8) + activeCustomPatternsCount
+    
     const mockResults: AnalysisResult = {
       summary: {
         totalDocs: totalDocuments,
@@ -2738,7 +2736,7 @@ function App() {
       anomalies: [
         // Always include comprehensive base violations regardless of NLP results
         {
-          type: 'Multi-Level Insider Trading Coordination Scheme',
+          type: 'Complex Insider Trading Pattern with Multi-Executive Coordination',
           riskLevel: 'critical' as const,
           description: 'Complex insider trading pattern involving multiple executives with coordinated timing around material events including earnings, M&A discussions, and regulatory filings',
           pattern: 'Advanced-Executive-Timeline-Coordination',
