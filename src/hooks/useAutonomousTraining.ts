@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { AnalysisResult } from '../types/analysis'
 import { AutonomousPattern, TrainingStatus } from '../types/patterns'
+import { AnalysisResult } from '../types/analysis'
 
-// Declare spark global
 declare global {
   interface Window {
     spark: {
@@ -13,9 +12,7 @@ declare global {
   }
 }
 
-declare const spark: Window['spark']
-
-export const useAutonomousTraining = () => {
+export function useAutonomousTraining() {
   const [trainingStatus, setTrainingStatus] = useKV<TrainingStatus>('training-status', {
     isActive: false,
     currentPhase: 'Idle',
@@ -29,13 +26,25 @@ export const useAutonomousTraining = () => {
   const [isTraining, setIsTraining] = useState(false)
 
   const updateTrainingStatus = useCallback((updates: Partial<TrainingStatus>) => {
-    setTrainingStatus(current => ({ ...current!, ...updates }))
+    setTrainingStatus(current => {
+      const defaultStatus: TrainingStatus = {
+        isActive: false,
+        currentPhase: 'Idle',
+        progress: 0,
+        patternsGenerated: 0,
+        lastTrainingTime: null,
+        trainingLog: []
+      }
+      return {
+        ...(current || defaultStatus),
+        ...updates
+      }
+    })
   }, [setTrainingStatus])
 
   const addToTrainingLog = useCallback((message: string) => {
-    const timestamp = new Date().toISOString()
     updateTrainingStatus({
-      trainingLog: [...(trainingStatus?.trainingLog || []), `[${timestamp}] ${message}`]
+      trainingLog: [...(trainingStatus?.trainingLog || []), `${new Date().toLocaleTimeString()}: ${message}`]
     })
   }, [trainingStatus?.trainingLog, updateTrainingStatus])
 
@@ -44,16 +53,14 @@ export const useAutonomousTraining = () => {
     consoleLogger: (message: string) => void
   ) => {
     if (isTraining) return
-    setIsTraining(true)
 
+    setIsTraining(true)
     updateTrainingStatus({
       isActive: true,
       currentPhase: 'Initializing AI Training',
-      progress: 10
+      progress: 0
     })
-
-    addToTrainingLog('Starting autonomous pattern generation...')
-    consoleLogger('AI Training: Starting autonomous pattern generation')
+    addToTrainingLog('Starting autonomous pattern generation')
 
     try {
       updateTrainingStatus({
@@ -72,7 +79,7 @@ export const useAutonomousTraining = () => {
         progress: 50
       })
 
-      const prompt = spark.llmPrompt`
+      const prompt = window.spark.llmPrompt`
         Analyze these SEC violations and generate 3-5 advanced detection patterns:
         
         Violations: ${JSON.stringify(analysisResults.violations.slice(0, 3))}
@@ -96,7 +103,7 @@ export const useAutonomousTraining = () => {
         }
       `
 
-      const aiResponse = await spark.llm(prompt, "gpt-4o", true)
+      const aiResponse = await window.spark.llm(prompt, "gpt-4o", true)
       const aiPatterns = JSON.parse(aiResponse)
 
       updateTrainingStatus({
