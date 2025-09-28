@@ -32,3 +32,11 @@ pids
 .devcontainer/
 
 .spark-workbench-id
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Pipeline status reports
+pipeline-status.json
