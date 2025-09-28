@@ -22,16 +22,6 @@ import { useAutonomousTraining } from './hooks/useAutonomousTraining'
 import { usePenaltyCalculation } from './hooks/usePenaltyCalculation'
 import { useConsole } from './hooks/useConsole'
 
-// Declare spark global
-declare global {
-  interface Window {
-    spark: {
-      llmPrompt: (strings: TemplateStringsArray, ...values: any[]) => string
-      llm: (prompt: string, modelName?: string, jsonMode?: boolean) => Promise<string>
-    }
-  }
-}
-
 function App() {
   const [activeTab, setActiveTab] = useState('upload')
 
