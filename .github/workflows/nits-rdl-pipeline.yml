@@ -1,0 +1,73 @@
+name: NITS RDL Deployment Pipeline
+'on':
+  push:
+    branches:
+    - main
+    - develop
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch: {}
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+jobs:
+  validate-and-build:
+    name: Validate & Build NITS System
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: npm
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Make Pipeline Executable
+      run: chmod +x rdl_deployment_pipeline.py nits_rdl_deployment.py
+    - name: Validate Environment
+      run: python rdl_deployment_pipeline.py --validate-only
+    - name: Build NITS System (Pipeline)
+      run: python rdl_deployment_pipeline.py --environment development
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nits-build-${{ github.sha }}
+        path: dist/
+        retention-days: ${{ vars.ARTIFACTS_RETENTION_DAYS || 30 }}
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: validate-and-build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: nits-build-${{ github.sha }}
+        path: dist/
+    - name: Deploy to Staging Environment
+      run: python rdl_deployment_pipeline.py --environment staging --deploy-artifacts
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: validate-and-build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: nits-build-${{ github.sha }}
+        path: dist/
+    - name: Deploy to Production Environment
+      run: python rdl_deployment_pipeline.py --environment production --deploy-artifacts

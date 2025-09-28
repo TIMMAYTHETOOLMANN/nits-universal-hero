@@ -2,7 +2,62 @@
 
 ## Overview
 
-The `nits_rdl_deployment.py` script provides comprehensive Rapid Deployment Logic (RDL) for the NITS Universal Forensic Intelligence System v2.0 (AI-Enhanced). This script automates the entire deployment process from environment validation to production server startup.
+The NITS deployment system provides two complementary scripts for different deployment scenarios:
+
+1. **`nits_rdl_deployment.py`** - Manual/local deployment script for development and testing
+2. **`rdl_deployment_pipeline.py`** - CI/CD pipeline orchestration for automated deployments
+
+Both scripts integrate seamlessly to provide comprehensive deployment capabilities for the NITS Universal Forensic Intelligence System v2.0 (AI-Enhanced).
+
+## Pipeline Deployment (Recommended)
+
+The `rdl_deployment_pipeline.py` script provides modern CI/CD pipeline capabilities with automated build and deployment orchestration.
+
+### Quick Start
+
+```bash
+# Create GitHub Actions workflow
+python rdl_deployment_pipeline.py --create-workflow
+
+# Validate pipeline configuration
+python rdl_deployment_pipeline.py --validate-only
+
+# Build only (no deployment)
+python rdl_deployment_pipeline.py --environment development
+
+# Build and deploy
+python rdl_deployment_pipeline.py --environment development --auto-deploy
+```
+
+### Pipeline Features
+
+- **Multi-environment support**: development, staging, production
+- **Automated dependency management** with proper dev dependency handling
+- **GitHub Actions integration** with automatic workflow generation
+- **Artifact management** with build caching and deployment
+- **Status reporting** with detailed pipeline execution metrics
+- **Retry logic** with configurable timeout and failure handling
+
+### Pipeline Commands
+
+| Command | Description |
+|---------|-------------|
+| `--create-workflow` | Generate GitHub Actions workflow file |
+| `--validate-only` | Validate environment and configuration |
+| `--environment <env>` | Target environment (development/staging/production) |
+| `--auto-deploy` | Deploy after successful build |
+| `--deploy-artifacts` | Deploy existing build artifacts |
+| `--github-token <token>` | GitHub API token for advanced features |
+
+### Pipeline Stages
+
+1. **Validation**: Environment checks and dependency validation
+2. **Build**: Clean dependency installation and application build
+3. **Deploy** (optional): Server deployment with health monitoring
+
+## Manual Deployment
+
+The `nits_rdl_deployment.py` script provides comprehensive manual deployment capabilities for development and testing.
 
 ## Features
 
@@ -215,15 +270,60 @@ Production deployments include automatic health monitoring:
 - Server response monitoring
 - Health check intervals (30s default)
 
-## Integration Examples
+## CI/CD Integration
 
-### CI/CD Pipeline
+### GitHub Actions Workflow
+
+The pipeline automatically generates a comprehensive GitHub Actions workflow:
+
 ```yaml
-# Example GitHub Actions step
-- name: Deploy NITS System
-  run: |
-    python nits_rdl_deployment.py --env production --build-only
-    # Additional deployment steps...
+# .github/workflows/nits-rdl-pipeline.yml
+name: NITS RDL Deployment Pipeline
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v4
+      - name: Build NITS System (Pipeline)
+        run: python rdl_deployment_pipeline.py --environment development
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nits-build-${{ github.sha }}
+          path: dist/
+```
+
+### Environment-Specific Deployment
+
+- **Development** (`develop` branch): Automatic validation and build
+- **Staging** (`develop` branch): Deploy to staging environment after successful build
+- **Production** (`main` branch): Deploy to production environment with approval gates
+
+### Pipeline Status Reporting
+
+Each pipeline execution generates a detailed status report (`pipeline-status.json`):
+
+```json
+{
+  "pipeline_version": "1.0.0",
+  "system_version": "2.0 (AI-Enhanced)",
+  "environment": "development",
+  "duration_seconds": 23.59,
+  "job_results": {
+    "Environment Validation": true,
+    "Build Application": true
+  },
+  "success_rate": 1.0,
+  "total_jobs": 2
+}
 ```
 
 ### Docker Integration
