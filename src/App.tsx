@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toaster } from '@/components/ui/sonner'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,7 @@ import { AutonomousTrainingModule } from './components/training/AutonomousTraini
 import { AnalysisSummary } from './components/results/AnalysisSummary'
 import { FinancialMatrix } from './components/financial/FinancialMatrix'
 import { SystemConsole } from './components/console/SystemConsole'
+import { ErrorFallback } from './ErrorFallback'
 
 // Import custom hooks
 import { useAnalysis } from './hooks/useAnalysis'
@@ -38,19 +40,19 @@ function App() {
   const fileManagement = useFileManagement()
   const autonomousTraining = useAutonomousTraining()
   const penalties = usePenaltyCalculation()
-  const console = useConsole()
+  const systemConsole = useConsole()
 
   // Auto-generate patterns after successful analysis
   useEffect(() => {
     if (analysis.results && !autonomousTraining.isTraining) {
-      autonomousTraining.generateAutonomousPatterns(analysis.results, console.addToConsole)
+      autonomousTraining.generateAutonomousPatterns(analysis.results, systemConsole.addToConsole)
     }
   }, [analysis.results, autonomousTraining.isTraining])
 
   // Calculate penalties when violations are detected
   useEffect(() => {
     if (analysis.results?.violations && analysis.results.violations.length > 0) {
-      penalties.calculatePenalties(analysis.results.violations, console.addToConsole)
+      penalties.calculatePenalties(analysis.results.violations, systemConsole.addToConsole)
     }
   }, [analysis.results?.violations])
 
@@ -77,7 +79,7 @@ function App() {
       fileManagement.secFiles,
       fileManagement.glamourFiles,
       convertedPatterns,
-      console.addToConsole
+      systemConsole.addToConsole
     )
   }
 
@@ -94,57 +96,64 @@ function App() {
       result.errors.forEach(error => toast.error(error))
     }
     
-    console.addToConsole(result.message)
+    systemConsole.addToConsole(result.message)
   }
 
   const handleExportMatrix = (format: string) => {
     if (!penalties.penaltyMatrix) return
     
     penalties.exportPenaltyMatrix(format)
-    console.addToConsole(`Exported penalty matrix in ${format.toUpperCase()} format`)
+    systemConsole.addToConsole(`Exported penalty matrix in ${format.toUpperCase()} format`)
   }
 
   const canExecuteAnalysis = fileManagement.getTotalFileCount() > 0
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-          <Shield size={32} className="text-primary" />
-          NITS Universal Forensic Intelligence System
-          <Badge variant="outline" className="text-xs">
-            AI-Enhanced v2.0
-          </Badge>
-        </h1>
-        <p className="text-muted-foreground">
-          Advanced forensic analysis with autonomous AI pattern training and surgical SEC penalty calculations
-        </p>
-        
-        {/* System Status */}
-        <div className="flex items-center gap-4 mt-3 text-sm">
-          <div>
-            Files: {fileManagement.getTotalFileCount()} 
-            ({fileManagement.secFiles.length} SEC, {fileManagement.glamourFiles.length} Glamour)
-          </div>
-          <div>
-            AI Patterns: {autonomousTraining.autonomousPatterns?.length || 0} 
-            ({autonomousTraining.getActivePatterns().length} active)
-          </div>
-          {autonomousTraining.trainingStatus?.isActive && (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error) => {
+        console.error('NITS System Error:', error)
+        toast.error('System error occurred. Please refresh and try again.')
+      }}
+    >
+      <div className="min-h-screen bg-background text-foreground p-4">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
+            <Shield size={32} className="text-primary" />
+            NITS Universal Forensic Intelligence System
             <Badge variant="outline" className="text-xs">
-              <Robot size={10} className="mr-1" />
-              Auto-Training Active
+              AI-Enhanced v2.0
             </Badge>
-          )}
-          {penalties.penaltyMatrix && (
-            <Badge variant="outline" className="text-xs text-orange-400">
-              <Calculator size={10} className="mr-1" />
-              ${penalties.penaltyMatrix.grand_total.toLocaleString()} Total Exposure
-            </Badge>
-          )}
+          </h1>
+          <p className="text-muted-foreground">
+            Advanced forensic analysis with autonomous AI pattern training and surgical SEC penalty calculations
+          </p>
+          
+          {/* System Status */}
+          <div className="flex items-center gap-4 mt-3 text-sm">
+            <div>
+              Files: {fileManagement.getTotalFileCount()} 
+              ({fileManagement.secFiles.length} SEC, {fileManagement.glamourFiles.length} Glamour)
+            </div>
+            <div>
+              AI Patterns: {autonomousTraining.autonomousPatterns?.length || 0} 
+              ({autonomousTraining.getActivePatterns().length} active)
+            </div>
+            {autonomousTraining.trainingStatus?.isActive && (
+              <Badge variant="outline" className="text-xs">
+                <Robot size={10} className="mr-1" />
+                Auto-Training Active
+              </Badge>
+            )}
+            {penalties.penaltyMatrix && (
+              <Badge variant="outline" className="text-xs text-orange-400">
+                <Calculator size={10} className="mr-1" />
+                ${penalties.penaltyMatrix.grand_total.toLocaleString()} Total Exposure
+              </Badge>
+            )}
+          </div>
         </div>
-      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList className="grid w-full grid-cols-3">
@@ -219,9 +228,9 @@ function App() {
             {/* Right Column - Console */}
             <div>
               <SystemConsole
-                consoleLog={console.consoleLog}
-                onClear={console.clearConsole}
-                onExport={console.exportConsoleLog}
+                consoleLog={systemConsole.consoleLog}
+                onClear={systemConsole.clearConsole}
+                onExport={systemConsole.exportConsoleLog}
                 maxHeight="800px"
               />
             </div>
@@ -237,7 +246,7 @@ function App() {
             onExportMatrix={handleExportMatrix}
             onRecalculate={() => {
               if (analysis.results?.violations) {
-                penalties.calculatePenalties(analysis.results.violations, console.addToConsole)
+                penalties.calculatePenalties(analysis.results.violations, systemConsole.addToConsole)
               }
             }}
           />
@@ -255,8 +264,9 @@ function App() {
         </TabsContent>
       </Tabs>
 
-      <Toaster />
-    </div>
+        <Toaster />
+      </div>
+    </ErrorBoundary>
   )
 }
 
