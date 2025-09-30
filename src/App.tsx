@@ -22,8 +22,16 @@ import { useAutonomousTraining } from './hooks/useAutonomousTraining'
 import { usePenaltyCalculation } from './hooks/usePenaltyCalculation'
 import { useConsole } from './hooks/useConsole'
 
+// Import legal fortification systems
+import { LegalDocumentHarvester } from '@/lib/legal-document-harvester'
+import { SurgicalDocumentParser } from '@/lib/surgical-document-parser'
+import { ViolationDetectionEngine } from '@/lib/violation-detection-engine'
+import { RegulatoryUpdateSystem } from '@/lib/regulatory-update-system'
+import { LegalPatternAnalyzer } from '@/lib/legal-pattern-analyzer'
+
 function App() {
   const [activeTab, setActiveTab] = useState('upload')
+  const [legalSystemsInitialized, setLegalSystemsInitialized] = useState(false)
 
   // Initialize all hooks
   const analysis = useAnalysis()
@@ -31,6 +39,39 @@ function App() {
   const autonomousTraining = useAutonomousTraining()
   const penalties = usePenaltyCalculation()
   const systemConsole = useConsole()
+
+  // Initialize legal fortification systems
+  useEffect(() => {
+    const initializeLegalSystems = async () => {
+      try {
+        systemConsole.addToConsole('⚖️ Initializing legal fortification systems...')
+        
+        const harvester = new LegalDocumentHarvester()
+        const parser = new SurgicalDocumentParser()
+        const detector = new ViolationDetectionEngine()
+        const updater = new RegulatoryUpdateSystem()
+        const analyzer = new LegalPatternAnalyzer()
+        
+        // Start autonomous operations
+        systemConsole.addToConsole('🔍 Starting legal document harvesting...')
+        await harvester.harvestAllRegulations()
+        
+        systemConsole.addToConsole('🔄 Starting regulatory monitoring...')
+        updater.startAutonomousMonitoring()
+        
+        // Link harvested data to detector
+        detector.setLegalIndex(harvester.getIndexedStatutes())
+        
+        setLegalSystemsInitialized(true)
+        systemConsole.addToConsole('⚖️ LEGAL FORTIFICATION COMPLETE - SYSTEM ARMED')
+      } catch (error) {
+        console.error('Legal systems initialization error:', error)
+        systemConsole.addToConsole('⚠️ Legal systems initialization completed with warnings')
+      }
+    }
+    
+    initializeLegalSystems()
+  }, [])
 
   // Auto-generate patterns after successful analysis
   useEffect(() => {
