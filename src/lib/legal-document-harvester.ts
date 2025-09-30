@@ -2,8 +2,12 @@
 // PURPOSE: Autonomously collect and index ALL legal documentation from govinfo.gov
 
 import type { ParsedLegalDocument, LegalProvision, CFRMetadata } from '../types/legal'
+import { MemoryOptimizer } from './memory-optimizer'
+import { BatchProcessor } from './performance-utils'
 
 export class LegalDocumentHarvester {
+  private memoryOptimizer: MemoryOptimizer
+  private batchProcessor: BatchProcessor<string, ParsedLegalDocument>
   private readonly GOVINFO_BASE = 'https://www.govinfo.gov/content/pkg'
   private readonly CFR_TITLES: Record<number, CFRMetadata> = {
     26: { name: 'Internal Revenue', volumes: 22, pages: 344 },
@@ -16,6 +20,11 @@ export class LegalDocumentHarvester {
 
   private documentCache = new Map<string, ParsedLegalDocument>()
   private indexedStatutes = new Map<string, LegalProvision[]>()
+
+  constructor() {
+    this.memoryOptimizer = new MemoryOptimizer(100) // 100MB cache limit
+    this.batchProcessor = new BatchProcessor<string, ParsedLegalDocument>(5, 2) // Process 5 at a time, 2 concurrent
+  }
 
   /**
    * Autonomous collection of ALL regulatory documents

@@ -4,6 +4,7 @@ import { CustomPattern } from '../types/patterns'
 import { ViolationDetection, ViolationEvidence } from '../types/penalties'
 import { ANALYSIS_PHASES } from '../constants/analysisConfig'
 import { formatTimestamp, formatAnalysisTime } from '../utils/dateUtils'
+import { LegalPatternAnalyzer } from '../lib/legal-pattern-analyzer'
 
 declare global {
   interface Window {
@@ -18,6 +19,11 @@ const spark = window.spark
 
 export class AnalysisEngine {
   private static instance: AnalysisEngine
+  private legalPatternAnalyzer: LegalPatternAnalyzer
+
+  constructor() {
+    this.legalPatternAnalyzer = new LegalPatternAnalyzer()
+  }
 
   static getInstance(): AnalysisEngine {
     if (!AnalysisEngine.instance) {
@@ -370,5 +376,29 @@ export class AnalysisEngine {
   private async simulatePhaseDelay(): Promise<void> {
     // Simulate realistic analysis time
     await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200))
+  }
+
+  /**
+   * Enhanced legal compliance analysis using legal pattern recognition
+   */
+  async analyzeLegalCompliance(content: string, onLog: (message: string) => void): Promise<void> {
+    try {
+      onLog('🔍 Running enhanced legal compliance analysis...')
+      const legalAnalysis = this.legalPatternAnalyzer.analyzeLegalCompliance(content)
+      
+      if (legalAnalysis.violations.length > 0) {
+        onLog(`⚠️ Detected ${legalAnalysis.violations.length} legal pattern violations`)
+        onLog(`📊 Legal risk score: ${legalAnalysis.riskScore.toFixed(2)}/10`)
+        
+        const criticalViolations = legalAnalysis.violations.filter(v => v.severity === 'critical')
+        if (criticalViolations.length > 0) {
+          onLog(`🚨 CRITICAL: ${criticalViolations.length} critical legal violations detected`)
+        }
+      } else {
+        onLog('✅ No immediate legal compliance concerns detected')
+      }
+    } catch (error) {
+      onLog('⚠️ Legal compliance analysis completed with warnings')
+    }
   }
 }
