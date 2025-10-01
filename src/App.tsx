@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo, useMemo } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Toaster } from '@/components/ui/sonner'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import * as Icons from 'lucide-react'
 import { 
   Upload, 
   Calculator, 
@@ -24,7 +27,10 @@ import {
   Info,
   CaretDown,
   CaretUp,
-  Terminal
+  Terminal,
+  Gear,
+  MagnifyingGlass,
+  WarningCircle
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
@@ -50,56 +56,74 @@ import { usePenaltyCalculation } from './hooks/usePenaltyCalculation'
 import { useConsole } from './hooks/useConsole'
 import { useAlertManager } from './hooks/useAlertManager'
 
-// Enhanced Dashboard Components
-const StatusIndicator: React.FC<{ label: string; status: string; count: string }> = ({ label, status, count }) => (
-  <div className="flex flex-col items-center text-xs">
+// Enhanced Dashboard Components with Motion
+const StatusIndicator = memo<{ label: string; status: string; count: string }>(({ label, status, count }) => (
+  <motion.div 
+    className="flex flex-col items-center text-xs"
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
     <div className={`flex items-center gap-1 ${
       status === 'SYNCHRONIZED' || status === 'ACTIVE' ? 'text-green-400' : 
       status === 'SCANNING' ? 'text-yellow-400' : 'text-gray-400'
     }`}>
-      <div className={`w-2 h-2 rounded-full ${
-        status === 'SYNCHRONIZED' || status === 'ACTIVE' ? 'bg-green-500 animate-pulse' : 
-        status === 'SCANNING' ? 'bg-yellow-500 animate-pulse' : 'bg-gray-500'
-      }`} />
+      <motion.div 
+        className={`w-2 h-2 rounded-full ${
+          status === 'SYNCHRONIZED' || status === 'ACTIVE' ? 'bg-green-500' : 
+          status === 'SCANNING' ? 'bg-yellow-500' : 'bg-gray-500'
+        }`}
+        animate={status === 'SYNCHRONIZED' || status === 'ACTIVE' || status === 'SCANNING' ? 
+          { scale: [1, 1.2, 1], opacity: [1, 0.7, 1] } : {}}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
       <span className="font-medium">{status}</span>
     </div>
     <span className="text-gray-500">{label}</span>
     <span className="text-gray-400 text-xs">{count}</span>
-  </div>
-)
+  </motion.div>
+))
 
-const DatabaseStatus: React.FC<{ title: string; pages: number; status: string }> = ({ title, pages, status }) => (
-  <div className="flex items-center justify-between p-2 bg-gray-800/50 rounded">
+const DatabaseStatus = memo<{ title: string; pages: number; status: string }>(({ title, pages, status }) => (
+  <motion.div 
+    className="flex items-center justify-between p-2 glassmorphism rounded"
+    whileHover={{ scale: 1.02 }}
+    transition={{ duration: 0.2 }}
+  >
     <div>
       <p className="text-sm text-gray-300">{title}</p>
       <p className="text-xs text-gray-500">{pages.toLocaleString()} pages</p>
     </div>
     <Badge className={`text-xs ${
-      status === 'INDEXED' ? 'bg-green-500/20 text-green-400' : 
+      status === 'INDEXED' ? 'bg-green-500/20 text-green-400 matrix-glow' : 
       status === 'UPDATING' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400'
     }`}>
       {status}
     </Badge>
-  </div>
-)
+  </motion.div>
+))
 
-const AnalysisModule: React.FC<{
+const AnalysisModule = memo<{
   name: string;
   progress: number;
   status: string;
   confidence: number;
   findings: string[];
-}> = ({ name, progress, status, confidence, findings }) => {
+}>(({ name, progress, status, confidence, findings }) => {
   const [expanded, setExpanded] = useState(false)
   
   return (
-    <div className="border border-gray-800 rounded-lg p-4 hover:border-green-500/50 transition-all">
+    <motion.div 
+      className="border border-gray-800 rounded-lg p-4 glassmorphism hover:border-green-500/50 transition-all"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-gray-300">{name}</h3>
         <Badge className={`text-xs ${
-          status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
+          status === 'COMPLETED' ? 'bg-green-500/20 text-green-400 matrix-glow' :
           status === 'ANALYZING' ? 'bg-yellow-500/20 text-yellow-400' :
-          'bg-blue-500/20 text-blue-400'
+          'bg-blue-500/20 text-blue-400 cyber-glow'
         }`}>
           {status}
         </Badge>
@@ -108,6 +132,13 @@ const AnalysisModule: React.FC<{
       {/* Animated Progress Bar */}
       <div className="relative mb-3">
         <Progress value={progress} className="h-2" />
+        <motion.div 
+          className="absolute top-0 left-0 h-full bg-gradient-forensic rounded opacity-30"
+          style={{ width: `${progress}%` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
         <div className="flex justify-between mt-1 text-xs text-gray-500">
           <span>{progress}%</span>
           <span>Confidence: {(confidence * 100).toFixed(0)}%</span>
@@ -115,24 +146,47 @@ const AnalysisModule: React.FC<{
       </div>
       
       {/* Expandable Findings */}
-      <button
+      <motion.button
         onClick={() => setExpanded(!expanded)}
         className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
-        {expanded ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />}
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {expanded ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />}
+        </motion.div>
         {findings.length} findings
-      </button>
+      </motion.button>
       
-      {expanded && (
-        <div className="mt-2 space-y-1 pl-3 border-l border-gray-700">
-          {findings.map((finding, idx) => (
-            <p key={idx} className="text-xs text-gray-400">• {finding}</p>
-          ))}
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div 
+            className="mt-2 space-y-1 pl-3 border-l border-gray-700"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {findings.map((finding, idx) => (
+              <motion.p 
+                key={idx} 
+                className="text-xs text-gray-400"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                • {finding}
+              </motion.p>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
-}
+})
 
 const ViolationItem: React.FC<{
   statute: string;
@@ -446,27 +500,73 @@ function App() {
         toast.error('System error occurred. Please refresh and try again.')
       }}
     >
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground dark">
+        {/* Matrix-style background overlay */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-95" />
+          <motion.div 
+            className="absolute inset-0 opacity-5"
+            animate={{ 
+              backgroundPosition: ['0% 0%', '100% 100%'],
+            }}
+            transition={{ 
+              duration: 20,
+              repeat: Infinity,
+              repeatType: 'reverse',
+              ease: 'linear'
+            }}
+            style={{
+              backgroundImage: 'radial-gradient(circle at 20% 20%, #00ff00 1px, transparent 1px), radial-gradient(circle at 80% 80%, #00ffff 1px, transparent 1px)',
+              backgroundSize: '50px 50px'
+            }}
+          />
+        </div>
         {/* HEADER: System Status & Intelligence Metrics */}
-        <header className="border-b border-green-500/30 bg-black/50 backdrop-blur-xl">
+        <motion.header 
+          className="border-b border-green-500/30 glassmorphism"
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {/* Animated Logo with Pulse Effect */}
+                {/* Animated Logo with Enhanced Pulse Effect */}
                 <div className="relative">
-                  <div className="absolute inset-0 bg-green-500 blur-xl animate-pulse opacity-50" />
-                  <Shield size={40} className="text-green-500 relative z-10" />
+                  <motion.div 
+                    className="absolute inset-0 bg-green-500 blur-xl opacity-50" 
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.7, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  <Shield size={40} className="text-green-500 relative z-10 matrix-glow" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
+                  <motion.h1 
+                    className="text-2xl font-bold text-gradient-forensic"
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                  >
                     NITS FORENSIC INTELLIGENCE
-                  </h1>
-                  <p className="text-xs text-green-500/70">LEGAL FORTIFICATION SYSTEM v3.0</p>
+                  </motion.h1>
+                  <motion.p 
+                    className="text-xs text-green-500/70"
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                  >
+                    LEGAL FORTIFICATION SYSTEM v3.0
+                  </motion.p>
                 </div>
               </div>
               
-              {/* Live System Metrics */}
-              <div className="flex items-center gap-6">
+              {/* Live System Metrics with staggered animations */}
+              <motion.div 
+                className="flex items-center gap-6"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+              >
                 <StatusIndicator label="Legal DB" status="SYNCHRONIZED" count="2.4M Statutes" />
                 <StatusIndicator 
                   label="ML Engine" 
@@ -478,10 +578,10 @@ function App() {
                   status={analysis.results?.violations?.length ? "DETECTED" : "SCANNING"} 
                   count={`${analysis.results?.violations?.length || 0} Found`} 
                 />
-              </div>
+              </motion.div>
             </div>
           </div>
-        </header>
+        </motion.header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border-gray-800 mx-4 mt-6">
@@ -515,12 +615,22 @@ function App() {
 
           {/* MAIN INTELLIGENCE DASHBOARD */}
           <TabsContent value="dashboard">
-            <div className="container mx-auto px-4 py-6">
-              <div className="grid grid-cols-12 gap-6">
+            <motion.div 
+              className="container mx-auto px-4 py-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 {/* LEFT PANEL: Document Processing Center */}
-                <div className="col-span-3 space-y-4">
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                <motion.div 
+                  className="lg:col-span-3 space-y-4"
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-green-400 flex items-center gap-2">
                         <Database className="w-5 h-5" />
@@ -546,30 +656,34 @@ function App() {
                         icon={<Upload size={20} />}
                       />
                       
-                      {/* Quick Analysis Buttons */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button 
-                          onClick={handleAnalysisExecution}
-                          disabled={!canExecuteAnalysis || analysis.isAnalyzing}
-                          className="bg-green-600/20 border-green-600/50 text-green-400 hover:bg-green-600/30"
-                        >
-                          <Lightning className="w-4 h-4 mr-1" />
-                          Quick Scan
-                        </Button>
-                        <Button 
-                          onClick={handleAnalysisExecution}
-                          disabled={!canExecuteAnalysis || analysis.isAnalyzing}
-                          className="bg-cyan-600/20 border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/30"
-                        >
-                          <Brain className="w-4 h-4 mr-1" />
-                          Deep Analysis
-                        </Button>
+                      {/* Enhanced Quick Analysis Buttons */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            onClick={handleAnalysisExecution}
+                            disabled={!canExecuteAnalysis || analysis.isAnalyzing}
+                            className="w-full bg-green-600/20 border-green-600/50 text-green-400 hover:bg-green-600/30 matrix-glow"
+                          >
+                            <Lightning className="w-4 h-4 mr-1" />
+                            Quick Scan
+                          </Button>
+                        </motion.div>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            onClick={handleAnalysisExecution}
+                            disabled={!canExecuteAnalysis || analysis.isAnalyzing}
+                            className="w-full bg-cyan-600/20 border-cyan-600/50 text-cyan-400 hover:bg-cyan-600/30 cyber-glow"
+                          >
+                            <Brain className="w-4 h-4 mr-1" />
+                            Deep Analysis
+                          </Button>
+                        </motion.div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Legal Database Status */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                  {/* Legal Database Status with enhanced styling */}
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-cyan-400 text-sm flex items-center gap-2">
                         <Scales className="w-4 h-4" />
@@ -585,19 +699,29 @@ function App() {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </motion.div>
 
                 {/* CENTER PANEL: Real-time Analysis Display */}
-                <div className="col-span-6 space-y-4">
-                  {/* ML Analysis Visualization */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                <motion.div 
+                  className="lg:col-span-6 space-y-4"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                >
+                  {/* ML Analysis Visualization with enhanced effects */}
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-green-400 flex items-center gap-2">
-                          <Activity className="w-5 h-5 animate-pulse" />
+                          <motion.div
+                            animate={{ rotate: analysis.isAnalyzing ? 360 : 0 }}
+                            transition={{ duration: 2, repeat: analysis.isAnalyzing ? Infinity : 0, ease: "linear" }}
+                          >
+                            <Activity className="w-5 h-5" />
+                          </motion.div>
                           LIVE FORENSIC ANALYSIS
                         </CardTitle>
-                        <Badge className="bg-red-500/20 text-red-400 border-red-500/50">
+                        <Badge className="bg-red-500/20 text-red-400 border-red-500/50 matrix-glow">
                           ML ENHANCED
                         </Badge>
                       </div>
@@ -606,14 +730,21 @@ function App() {
                       {/* Animated Analysis Progress */}
                       <div className="space-y-4">
                         {mockAnalysisModules.map((module, idx) => (
-                          <AnalysisModule key={idx} {...module} />
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1, duration: 0.3 }}
+                          >
+                            <AnalysisModule {...module} />
+                          </motion.div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Violation Detection Matrix */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                  {/* Enhanced Violation Detection Matrix */}
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader>
                       <CardTitle className="text-red-400 flex items-center gap-2">
                         <Warning className="w-5 h-5" />
@@ -621,7 +752,12 @@ function App() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-3 gap-4 mb-4">
+                      <motion.div 
+                        className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6, duration: 0.5 }}
+                      >
                         <MetricCard 
                           label="Criminal" 
                           value={analysis.results?.violations?.filter(v => v.false_positive_risk === 'low').length || 0} 
@@ -637,13 +773,23 @@ function App() {
                           value={analysis.results?.violations?.filter(v => v.false_positive_risk === 'high').length || 0} 
                           severity="medium" 
                         />
-                      </div>
+                      </motion.div>
                       
-                      {/* Scrollable Violation List */}
+                      {/* Scrollable Violation List with virtual scrolling optimization */}
                       <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {mockViolations.map((violation, idx) => (
-                          <ViolationItem key={idx} {...violation} />
-                        ))}
+                        <AnimatePresence>
+                          {mockViolations.map((violation, idx) => (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 20 }}
+                              transition={{ delay: idx * 0.05, duration: 0.3 }}
+                            >
+                              <ViolationItem {...violation} />
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
                       </div>
                     </CardContent>
                   </Card>
@@ -664,12 +810,17 @@ function App() {
                     onDeletePattern={autonomousTraining.deletePattern}
                     onClearLog={autonomousTraining.clearTrainingLog}
                   />
-                </div>
+                </motion.div>
 
                 {/* RIGHT PANEL: Evidence & Export Center */}
-                <div className="col-span-3 space-y-4">
-                  {/* Evidence Package Generator */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                <motion.div 
+                  className="lg:col-span-3 space-y-4"
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                >
+                  {/* Enhanced Evidence Package Generator */}
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-purple-400 flex items-center gap-2">
                         <Package className="w-5 h-5" />
@@ -677,35 +828,43 @@ function App() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                      <motion.div 
+                        className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg"
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         <p className="text-xs text-purple-300 mb-1">Prosecution Ready</p>
                         <p className="text-2xl font-bold text-purple-400">
                           ${penalties.penaltyMatrix ? (penalties.penaltyMatrix.grand_total / 1000000).toFixed(1) : '0.0'}M
                         </p>
                         <p className="text-xs text-gray-500">Estimated Recovery</p>
-                      </div>
+                      </motion.div>
                       
-                      <Button 
-                        onClick={() => handleExportMatrix('txt')}
-                        disabled={!penalties.penaltyMatrix}
-                        className="w-full bg-purple-600/20 border-purple-600/50 text-purple-400 hover:bg-purple-600/30"
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Generate SEC Form TCR
-                      </Button>
-                      <Button 
-                        onClick={() => handleExportMatrix('complete')}
-                        disabled={!penalties.penaltyMatrix}
-                        className="w-full bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30"
-                      >
-                        <Package className="w-4 h-4 mr-2" />
-                        DOJ Criminal Referral
-                      </Button>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button 
+                          onClick={() => handleExportMatrix('txt')}
+                          disabled={!penalties.penaltyMatrix}
+                          className="w-full bg-purple-600/20 border-purple-600/50 text-purple-400 hover:bg-purple-600/30"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Generate SEC Form TCR
+                        </Button>
+                      </motion.div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button 
+                          onClick={() => handleExportMatrix('complete')}
+                          disabled={!penalties.penaltyMatrix}
+                          className="w-full bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30"
+                        >
+                          <Package className="w-4 h-4 mr-2" />
+                          DOJ Criminal Referral
+                        </Button>
+                      </motion.div>
                     </CardContent>
                   </Card>
 
-                  {/* Real-time Statistics */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                  {/* Enhanced Real-time Statistics */}
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-cyan-400 text-sm">System Performance</CardTitle>
                     </CardHeader>
@@ -730,7 +889,7 @@ function App() {
                   </Card>
 
                   {/* System Console - Compact */}
-                  <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                  <Card className="glassmorphism border-gray-800">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-green-400 text-sm">System Console</CardTitle>
                     </CardHeader>
@@ -749,19 +908,28 @@ function App() {
 
                   {/* Alert System Testing Panel */}
                   <AlertTestPanel />
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* BOTTOM STATUS BAR */}
-            <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur border-t border-green-500/30">
+            {/* ENHANCED BOTTOM STATUS BAR */}
+            <motion.div 
+              className="fixed bottom-0 left-0 right-0 glassmorphism border-t border-green-500/30 z-40"
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+            >
               <div className="container mx-auto px-4 py-2">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-4 text-green-400">
-                    <span className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <motion.span 
+                      className="flex items-center gap-1"
+                      animate={{ opacity: [1, 0.7, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <div className="w-2 h-2 bg-green-500 rounded-full matrix-glow" />
                       SYSTEM ARMED
-                    </span>
+                    </motion.span>
                     <span>|</span>
                     <span>Legal DB: 2,487,923 Statutes</span>
                     <span>|</span>
@@ -772,16 +940,19 @@ function App() {
                   <div className="flex items-center gap-4">
                     <span className="text-gray-500">Command Center Active</span>
                     <span className="text-gray-600">|</span>
-                    <div className="flex items-center gap-1 text-gray-500">
+                    <motion.div 
+                      className="flex items-center gap-1 text-gray-500"
+                      whileHover={{ scale: 1.05 }}
+                    >
                       <Terminal className="w-3 h-3" />
                       <span>Press</span>
-                      <kbd className="bg-gray-800 px-1 py-0.5 rounded text-xs">⌘K</kbd>
+                      <kbd className="bg-gray-800 px-1 py-0.5 rounded text-xs glassmorphism">⌘K</kbd>
                       <span>for commands</span>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </TabsContent>
 
           {/* Advanced Visualizations Tab */}

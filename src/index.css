@@ -11,6 +11,43 @@
     background-color: var(--background);
     color: var(--foreground);
   }
+  
+  /* Force dark mode by default */
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* Custom color scheme for forensic theme */
+@layer utilities {
+  .bg-gradient-forensic {
+    background: linear-gradient(135deg, #00ff00 0%, #00ffff 100%);
+  }
+  
+  .bg-gradient-forensic-subtle {
+    background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+  }
+  
+  .text-gradient-forensic {
+    background: linear-gradient(135deg, #00ff00 0%, #00ffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .glassmorphism {
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .matrix-glow {
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  }
+  
+  .cyber-glow {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
 }
 
 :root {
