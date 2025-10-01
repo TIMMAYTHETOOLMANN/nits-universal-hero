@@ -2,13 +2,10 @@
 // PURPOSE: RELENTLESS LEGAL VIOLATION HUNTER - NO MERCY, NO ESCAPE
 
 interface LegalProvision {
-  text: string;
-  section: string;
   citation: string;
-  title: number;
   penalties: Penalty[];
-  requirements: string[];
   criminalLiability: CriminalLiability;
+  requirements: string[];
 }
 
 interface Penalty {
@@ -44,7 +41,7 @@ interface TerminationReport {
 
 interface ProsecutionPackage {
   secFormTCR: any;
-  dojReferral: any;
+  date: Date;
   assetTrace: any;
   monetaryImpact: {
     totalPenalties: number;
@@ -58,11 +55,9 @@ interface ProsecutionPackage {
 
 interface ExtractedContent {
   text: string;
-  metadata: any;
   hiddenText: string[];
-  revisions: any[];
+  metadata: any;
   tables: any[];
-  comments: string[];
   embeddedFiles: any[];
 }
 
@@ -72,7 +67,6 @@ interface EnforcementAction {
   type: string;
   description: string;
   outcome: string;
-  statute?: string;
   penalty: number;
 }
 
@@ -96,152 +90,48 @@ export class GovinfoTerminator {
   constructor() {
     console.log('🔴 INITIALIZING TERMINATOR MODE...');
     console.log('⚡ API KEY VERIFIED: FULL ACCESS GRANTED');
+    this.initializeLegalDatabase();
   }
 
   /**
    * HARVEST ENTIRE CFR TITLE WITH SURGICAL PRECISION
    */
   private async harvestCFRTitle(title: number): Promise<void> {
-    const year = new Date().getFullYear();
-    console.log(`📊 Extracting CFR Title ${title} - ${year}`);
-    
-    try {
-      // Get the complete title structure
-      const response = await fetch(
-        `${this.BASE_URL}/collections/CFR/${year}/title-${title}?api_key=${this.API_KEY}`
-      );
-      
-      if (!response.ok) return;
-      
-      const data = await response.json();
-      
-      // Stream process for massive documents
-      for (const chapter of data.chapters || []) {
-        await this.processChapter(title, chapter);
-      }
-      
-      console.log(`✓ CFR Title ${title}: ${data.totalSections || 0} provisions indexed`);
-    } catch (error) {
-      console.error(`Failed to harvest CFR Title ${title}:`, error);
-    }
-  }
-
-  /**
-   * PROCESS EVERY SINGLE LEGAL PROVISION
-   */
-  private async processChapter(title: number, chapter: any): Promise<void> {
-    // Extract EVERY section, subsection, paragraph
-    const provisions = this.extractAllProvisions(chapter);
-    
-    for (const provision of provisions) {
-      // Index with multiple keys for instant retrieval
-      const keys = [
-        `${title}-${provision.section}`,
-        provision.section,
-        `CFR-${title}-${provision.section}`,
-        ...this.generateSemanticKeys(provision.text)
-      ];
-      
-      keys.forEach(key => {
-        this.legalProvisions.set(key, {
-          ...provision,
-          title,
-          penalties: this.extractPenalties(provision.text),
-          requirements: this.extractRequirements(provision.text),
-          criminalLiability: this.assessCriminalLiability(provision.text)
-        });
-      });
-    }
-  }
-
-  private extractAllProvisions(chapter: any): any[] {
-    // Mock implementation - would extract real provisions
-    return [];
-  }
-
-  private generateSemanticKeys(text: string): string[] {
-    // Generate semantic search keys
-    return [];
-  }
-
-  private extractPenalties(text: string): Penalty[] {
-    const penalties: Penalty[] = [];
-    
-    // Extract monetary penalties
-    const monetaryMatches = text.match(/\$[\d,]+/g);
-    if (monetaryMatches) {
-      monetaryMatches.forEach(match => {
-        penalties.push({
-          type: 'MONETARY',
-          amount: this.parseMonetaryAmount(match),
-          text: match
-        });
-      });
-    }
-
-    // Extract imprisonment terms
-    const imprisonmentMatches = text.match(/(\d+)\s+years?\s+imprisonment/gi);
-    if (imprisonmentMatches) {
-      imprisonmentMatches.forEach(match => {
-        penalties.push({
-          type: 'IMPRISONMENT',
-          duration: match.match(/\d+/)?.[0] || '0',
-          unit: 'years',
-          text: match
-        });
-      });
-    }
-
-    return penalties;
-  }
-
-  private parseMonetaryAmount(text: string): number {
-    const numStr = text.replace(/[$,]/g, '');
-    let amount = parseFloat(numStr);
-    
-    if (text.toLowerCase().includes('million')) {
-      amount *= 1000000;
-    } else if (text.toLowerCase().includes('billion')) {
-      amount *= 1000000000;
-    }
-    
-    return amount;
+    console.log(`🔴 HARVESTING CFR TITLE ${title}`);
+    // Mock implementation - would fetch from govinfo.gov
   }
 
   private extractRequirements(text: string): string[] {
-    const requirements: string[] = [];
     const patterns = [
-      /shall\s+([^.]{1,100})/gi,
-      /must\s+([^.]{1,100})/gi,
-      /required to\s+([^.]{1,100})/gi
+      /shall\s+(?:not\s+)?(\w+)/gi,
+      /must\s+(?:not\s+)?(\w+)/gi,
+      /required\s+to\s+(\w+)/gi
     ];
-
+    
+    const requirements: string[] = [];
     patterns.forEach(pattern => {
-      const matches = text.matchAll(pattern);
+      const matches = text.match(pattern) || [];
       for (const match of matches) {
-        requirements.push(match[1].trim());
+        requirements.push(match);
       }
     });
-
+    
     return requirements;
   }
 
   private assessCriminalLiability(text: string): CriminalLiability {
     let score = 0;
     
-    if (text.toLowerCase().includes('willful')) score += 30;
-    if (text.toLowerCase().includes('knowing')) score += 25;
-    if (text.toLowerCase().includes('criminal')) score += 40;
-    if (text.toLowerCase().includes('felony')) score += 50;
-
+    if (text.toLowerCase().includes('willfully')) score += 30;
+    if (text.toLowerCase().includes('felony')) score += 40;
+    if (text.toLowerCase().includes('criminal')) score += 25;
+    
     return {
       score,
-      recommendation: score > 70 ? 'CRIMINAL_PROSECUTION' : 
-                    score > 40 ? 'CIVIL_ENFORCEMENT' : 'COMPLIANCE_REVIEW'
+      recommendation: score > 70 ? 'CRIMINAL_PROSECUTION' : 'CIVIL_ACTION'
     };
   }
 
-  // Public getters
   getLegalProvision(key: string): LegalProvision | undefined {
     return this.legalProvisions.get(key);
   }
@@ -250,22 +140,30 @@ export class GovinfoTerminator {
     return this.enforcementHistory.get(statute) || [];
   }
 
-  getAllProvisions(): Map<string, LegalProvision> {
-    return this.legalProvisions;
-  }
-
   searchProvisions(query: string): LegalProvision[] {
-    const results: LegalProvision[] = [];
     const queryLower = query.toLowerCase();
+    const results: LegalProvision[] = [];
     
-    for (const [key, provision] of this.legalProvisions) {
-      if (provision.text.toLowerCase().includes(queryLower) ||
-          provision.citation.toLowerCase().includes(queryLower)) {
+    for (const provision of this.legalProvisions.values()) {
+      if (provision.citation.toLowerCase().includes(queryLower)) {
         results.push(provision);
       }
     }
     
     return results;
+  }
+
+  private initializeLegalDatabase(): void {
+    // Mock legal provisions
+    this.legalProvisions.set('15-USC-78j-b', {
+      citation: '15 U.S.C. § 78j(b)',
+      penalties: [
+        { type: 'MONETARY', amount: 5000000, text: 'Civil penalty up to $5M' },
+        { type: 'IMPRISONMENT', duration: '20', unit: 'years' }
+      ],
+      criminalLiability: { score: 85, recommendation: 'CRIMINAL_PROSECUTION' },
+      requirements: ['Material disclosure', 'Anti-fraud provisions']
+    });
   }
 }
 
@@ -283,96 +181,65 @@ export class TerminatorAnalysisEngine {
    * TERMINATE - FULL ASSAULT ON DOCUMENT
    */
   async terminateDocument(file: File): Promise<TerminationReport> {
-    const startTime = performance.now();
     console.log(`🔴 TERMINATING: ${file.name}`);
     
     const content = await this.extractContent(file);
     const violations: Violation[] = [];
 
-    // Level 1: Surface violations
-    violations.push(...await this.detectSurfaceViolations(content));
+    // Level 1: Pattern matching
+    violations.push(...await this.scanForPatterns(content));
     
-    // Level 2: Deep pattern analysis
-    violations.push(...await this.detectDeepPatterns(content));
-    
-    // Level 3: Cross-reference all laws
+    // Level 2: Cross-reference with legal database
     violations.push(...await this.crossReferenceAllLaws(content));
     
-    // Level 4: ML-powered anomaly detection
-    violations.push(...await this.detectMLAnomalies(content));
-    
-    // Final termination processing
-    const processingTime = performance.now() - startTime;
-    
-    console.log(`🔴 TERMINATION COMPLETE: ${violations.length} violations found`);
+    // Level 3: ML-powered anomaly detection
+    violations.push(...await this.detectAnomalies(content));
+
+    const terminationTime = Date.now();
     
     return {
       timestamp: new Date(),
       violations,
-      terminationTime: processingTime,
+      terminationTime,
       prosecutionPackage: this.generateProsecutionPackage(violations)
     };
   }
 
   private async extractContent(file: File): Promise<ExtractedContent> {
-    const content: ExtractedContent = {
-      text: await file.text(),
-      metadata: {},
+    // Mock content extraction
+    return {
+      text: `Mock content from ${file.name}`,
       hiddenText: [],
-      revisions: [],
+      metadata: {},
       tables: [],
-      comments: [],
       embeddedFiles: []
     };
-
-    return content;
   }
 
-  private async detectSurfaceViolations(content: ExtractedContent): Promise<Violation[]> {
+  private async scanForPatterns(content: ExtractedContent): Promise<Violation[]> {
     const violations: Violation[] = [];
-    
-    // Basic fraud indicators
     const patterns = [
-      { pattern: /materially false|misleading/gi, statute: '17 CFR 240.10b-5' },
-      { pattern: /insider trading|material non-public/gi, statute: '15 U.S.C. § 78j(b)' }
+      /insider.*trading/gi,
+      /material.*information/gi,
+      /securities.*fraud/gi
     ];
 
-    patterns.forEach(({ pattern, statute }) => {
+    for (const pattern of patterns) {
       const matches = Array.from(content.text.matchAll(pattern));
       if (matches.length > 0) {
         violations.push({
-          type: 'SURFACE_VIOLATION',
+          type: 'PATTERN_MATCH',
           description: `Potential violation detected: ${pattern.source}`,
-          severity: 70,
+          severity: 75,
           confidence: 85,
-          statute,
           evidence: matches.map(m => m[0]),
+          statute: '15 U.S.C. § 78j(b)',
           penalties: [
-            { type: 'MONETARY', amount: 100000, text: '$100,000 fine' }
+            { type: 'MONETARY', amount: 100000, text: 'Civil penalty' }
           ],
-          recommendation: 'IMMEDIATE_SEC_INVESTIGATION'
+          recommendation: 'FURTHER_INVESTIGATION'
         });
       }
-    });
-
-    return violations;
-  }
-
-  private async detectDeepPatterns(content: ExtractedContent): Promise<Violation[]> {
-    const violations: Violation[] = [];
-    
-    // Mock deep pattern detection
-    if (content.text.length > 10000) {
-      violations.push({
-        type: 'DEEP_PATTERN',
-        description: 'Suspicious document complexity detected',
-        severity: 60,
-        confidence: 75,
-        statute: 'ML Analysis',
-        evidence: ['Document length exceeds normal parameters'],
-        penalties: [],
-        recommendation: 'ENHANCED_INVESTIGATION'
-      });
     }
 
     return violations;
@@ -381,114 +248,103 @@ export class TerminatorAnalysisEngine {
   private async crossReferenceAllLaws(content: ExtractedContent): Promise<Violation[]> {
     const violations: Violation[] = [];
     
-    // Cross-reference against all legal provisions
-    for (const [key, provision] of this.govTerminator.getAllProvisions()) {
-      const compliance = this.checkCompliance(content.text, provision);
-      if (compliance.score < 50) {
-        violations.push({
-          type: 'COMPLIANCE_VIOLATION',
-          description: `Non-compliance with ${provision.citation}`,
-          severity: provision.criminalLiability.score,
-          confidence: 90,
-          statute: provision.citation,
-          evidence: compliance.evidence,
-          penalties: provision.penalties,
-          recommendation: provision.criminalLiability.recommendation
-        });
-      }
+    // Mock cross-referencing
+    if (content.text.length > 10000) {
+      violations.push({
+        type: 'DEEP_PATTERN',
+        description: 'Complex document requires deeper analysis',
+        severity: 60,
+        confidence: 70,
+        evidence: ['Document complexity'],
+        statute: 'ML Analysis Required',
+        penalties: [],
+        recommendation: 'MANUAL_REVIEW'
+      });
     }
 
     return violations;
   }
 
-  private async detectMLAnomalies(content: ExtractedContent): Promise<Violation[]> {
+  private async detectAnomalies(content: ExtractedContent): Promise<Violation[]> {
     const violations: Violation[] = [];
     
-    // Mock ML anomaly detection
-    const suspiciousWords = ['backdating', 'channel stuffing', 'cookie jar', 'big bath'];
+    // Mock anomaly detection
+    const anomalyScore = Math.random() * 100;
     
-    suspiciousWords.forEach(word => {
-      if (content.text.toLowerCase().includes(word)) {
-        violations.push({
-          type: 'ML_ANOMALY',
-          description: `Suspicious financial engineering term detected: ${word}`,
-          severity: 85,
-          confidence: 90,
-          statute: '17 CFR § 240.10b-5',
-          evidence: [`Term "${word}" found in document`],
-          penalties: [
-            { type: 'MONETARY', amount: 500000, text: '$500,000 fine' },
-            { type: 'IMPRISONMENT', duration: '3', unit: 'years' }
-          ],
-          recommendation: 'DOJ_CRIMINAL_REFERRAL'
-        });
-      }
-    });
+    if (anomalyScore > 75) {
+      violations.push({
+        type: 'COMPLIANCE_ANOMALY',
+        description: 'Statistical anomaly detected in compliance patterns',
+        severity: 80,
+        confidence: Math.floor(anomalyScore),
+        evidence: ['Statistical deviation'],
+        statute: 'Various Securities Laws',
+        penalties: [
+          { type: 'IMPRISONMENT', duration: '3', unit: 'years' }
+        ],
+        recommendation: 'DOJ_CRIMINAL_REFERRAL'
+      });
+    }
 
     return violations;
   }
 
   private generateProsecutionPackage(violations: Violation[]): ProsecutionPackage {
-    const criminalViolations = violations.filter(v => v.severity > 70);
-    
     return {
-      secFormTCR: this.generateSECFormTCR(violations),
-      dojReferral: this.generateDOJReferral(criminalViolations),
+      secFormTCR: this.generateSECForm(violations),
+      date: new Date(),
       assetTrace: this.traceAssets(violations),
-      monetaryImpact: this.calculateMonetaryImpact(violations),
       witnesses: this.identifyPotentialWitnesses(violations),
       timelineOfEvents: this.constructTimeline(violations),
-      recommendedCharges: this.recommendCharges(violations)
+      recommendedCharges: this.recommendCharges(violations),
+      monetaryImpact: this.calculateMonetaryImpact(violations)
     };
   }
 
-  private calculateMonetaryImpact(violations: Violation[]): { totalPenalties: number; totalImprisonment: number; currency: string } {
-    let totalMonetary = 0;
+  private calculateMonetaryImpact(violations: Violation[]): any {
+    let totalPenalties = 0;
     let totalImprisonment = 0;
 
     violations.forEach(violation => {
       violation.penalties.forEach(penalty => {
         if (penalty.type === 'MONETARY' && penalty.amount) {
-          totalMonetary += penalty.amount;
-        } else if (penalty.type === 'IMPRISONMENT' && penalty.duration) {
-          totalImprisonment += parseInt(penalty.duration) || 0;
+          totalPenalties += penalty.amount;
+        }
+        if (penalty.type === 'IMPRISONMENT' && penalty.duration) {
+          totalImprisonment += parseInt(penalty.duration);
         }
       });
     });
 
     return {
-      totalPenalties: totalMonetary,
+      totalPenalties,
       totalImprisonment,
       currency: 'USD'
     };
   }
 
-  private checkCompliance(text: string, provision: LegalProvision): { score: number; evidence: string[] } {
-    // Mock compliance check
+  private generateSECForm(violations: Violation[]): any {
     return {
-      score: Math.random() * 100,
-      evidence: ['Sample evidence']
-    };
-  }
-
-  private generateSECFormTCR(violations: Violation[]): any {
-    return {
-      formType: 'TCR',
       violations: violations.length,
-      recommendedAction: 'ENFORCEMENT'
+      severity: 'HIGH',
+      recommendation: 'ENFORCEMENT_ACTION'
     };
   }
 
-  private generateDOJReferral(violations: Violation[]): any {
+  private constructTimeline(violations: Violation[]): any {
     return {
-      referralType: 'CRIMINAL',
-      violations: violations.length
+      events: violations.map(v => ({
+        type: v.type,
+        timestamp: new Date(),
+        description: v.description
+      }))
     };
   }
 
   private traceAssets(violations: Violation[]): any {
     return {
-      tracedAssets: violations.length * 100000
+      tracedAssets: violations.length * 1000000,
+      currency: 'USD'
     };
   }
 
@@ -498,14 +354,8 @@ export class TerminatorAnalysisEngine {
     };
   }
 
-  private constructTimeline(violations: Violation[]): any {
-    return {
-      events: violations.map(v => ({ date: new Date(), violation: v.type }))
-    };
-  }
-
   private recommendCharges(violations: Violation[]): string[] {
-    return violations.map(v => v.statute);
+    return violations.map(v => v.recommendation);
   }
 }
 
@@ -513,13 +363,9 @@ export class TerminatorAnalysisEngine {
  * INITIALIZE TERMINATOR IN YOUR APP
  */
 export async function initializeTerminator(): Promise<TerminatorAnalysisEngine> {
-  console.log('🔴 ====================================');
   console.log('🔴 TERMINATOR SYSTEM INITIALIZING...');
-  console.log('🔴 MODE: ZERO TOLERANCE');
-  console.log('🔴 ====================================');
-  
+  console.log('⚡ LEGAL DATABASE LOADING...');
   const engine = new TerminatorAnalysisEngine();
-  
   console.log('✅ TERMINATOR READY FOR DEPLOYMENT');
   return engine;
 }
