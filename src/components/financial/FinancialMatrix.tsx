@@ -17,11 +17,32 @@ import {
 } from '@phosphor-icons/react'
 
 interface ViolationEvidence {
+  id: string
+  violation_type: string
   exact_quote: string
-  section_reference: string
-  confidence_level: number
-  materiality_threshold_met: boolean
   source_file?: string
+  page_number?: number
+  section_reference: string
+  context_before: string
+  context_after: string
+  rule_violated: string
+  legal_standard: string
+  materiality_threshold_met: boolean
+  corroborating_evidence: string[]
+  hyperlink_anchor?: string
+  timestamp_extracted: string
+  confidence_level: number
+  manual_review_required: boolean
+  financial_impact?: {
+    profit_amount?: number
+    penalty_base?: number
+    enhancement_multiplier?: number
+    total_exposure?: number
+  }
+  source_file_type?: string
+  violation_specificity_score?: number
+  location_precision?: number
+  financial_data_present?: number
 }
 
 interface ViolationDetection {
@@ -394,17 +415,78 @@ export const FinancialMatrix: React.FC<FinancialMatrixProps> = ({
               <h4 className="font-medium">Evidence Items:</h4>
               {selectedViolation.evidence.map((evidence, index) => (
                 <div key={index} className="p-3 rounded bg-background/50 border border-border/50">
-                  <div className="text-sm mb-2">
-                    <strong>Section:</strong> {evidence.section_reference}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <div className="text-sm">
+                      <strong>Source File:</strong> {evidence.source_file || selectedViolation.document}
+                    </div>
+                    <div className="text-sm">
+                      <strong>Page/Section:</strong> {evidence.page_number ? `Page ${evidence.page_number}, ` : ''}{evidence.section_reference}
+                    </div>
+                    <div className="text-sm">
+                      <strong>Confidence:</strong> {Math.round(evidence.confidence_level * 100)}%
+                    </div>
+                    <div className="text-sm">
+                      <strong>Rule Violated:</strong> {evidence.rule_violated}
+                    </div>
                   </div>
+                  
                   <div className="text-sm mb-2">
-                    <strong>Confidence:</strong> {Math.round(evidence.confidence_level * 100)}%
-                  </div>
-                  <div className="text-sm">
-                    <strong>Quote:</strong>
-                    <div className="mt-1 p-2 bg-background/50 rounded italic text-muted-foreground">
+                    <strong>Violation Quote:</strong>
+                    <div className="mt-1 p-3 bg-background/50 rounded border-l-4 border-orange-500/50 italic text-muted-foreground">
                       "{evidence.exact_quote}"
                     </div>
+                  </div>
+                  
+                  {evidence.context_before && (
+                    <div className="text-xs mb-2">
+                      <strong>Context Before:</strong> <span className="text-muted-foreground">{evidence.context_before}</span>
+                    </div>
+                  )}
+                  
+                  {evidence.context_after && (
+                    <div className="text-xs mb-2">
+                      <strong>Context After:</strong> <span className="text-muted-foreground">{evidence.context_after}</span>
+                    </div>
+                  )}
+                  
+                  {evidence.corroborating_evidence && evidence.corroborating_evidence.length > 0 && (
+                    <div className="text-xs">
+                      <strong>Corroborating Evidence:</strong>
+                      <ul className="mt-1 space-y-1 text-muted-foreground">
+                        {evidence.corroborating_evidence.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-orange-400">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {evidence.financial_impact && (
+                    <div className="mt-3 p-2 bg-orange-500/10 border border-orange-500/20 rounded">
+                      <div className="text-xs font-medium text-orange-400 mb-1">Financial Impact Analysis:</div>
+                      <div className="text-xs space-y-1">
+                        {evidence.financial_impact.profit_amount && (
+                          <div>Profit Amount: ${evidence.financial_impact.profit_amount.toLocaleString()}</div>
+                        )}
+                        {evidence.financial_impact.penalty_base && (
+                          <div>Base Penalty: ${evidence.financial_impact.penalty_base.toLocaleString()}</div>
+                        )}
+                        {evidence.financial_impact.enhancement_multiplier && (
+                          <div>Enhancement Multiplier: {evidence.financial_impact.enhancement_multiplier}x</div>
+                        )}
+                        {evidence.financial_impact.total_exposure && (
+                          <div className="font-medium text-orange-400">
+                            Total Exposure: ${evidence.financial_impact.total_exposure.toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    Evidence ID: {evidence.id} | Extracted: {new Date(evidence.timestamp_extracted).toLocaleString()}
                   </div>
                 </div>
               ))}
