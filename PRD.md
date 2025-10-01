@@ -1,87 +1,86 @@
-# NITS Universal Forensic Intelligence System
+# NITS Forensic Intelligence System - Production Ready
 
-A comprehensive web-based forensic document analysis platform that performs cross-document triangulation on SEC regulatory filings and public corporate communications to identify potential compliance violations, insider trading patterns, ESG greenwashing, and litigation risks.
+A clean, production-ready legal document analysis platform with no placeholder data or misleading indicators.
 
 **Experience Qualities**:
-1. Professional - Serious forensic analysis tool with cyberpunk visual design that conveys technical expertise
-2. Intuitive - Complex functionality presented through clear visual hierarchy and immediate feedback
-3. Comprehensive - Complete forensic intelligence pipeline from upload to export with detailed analysis
+1. **Professional Authenticity** - Every indicator reflects actual system state with no fake progress bars or placeholder violations
+2. **Progressive Disclosure** - Interface elements appear only when relevant, creating a focused user experience
+3. **Forensic Precision** - Clean, cyberpunk-inspired design that projects technical competence and legal authority
 
-**Complexity Level**: Complex Application (advanced functionality, accounts)
-- Multi-phase document analysis with 6 specialized detection modules requiring sophisticated state management and real-time processing feedback
+**Complexity Level**: Light Application (multiple features with basic state)
+- Real file handling and analysis workflow
+- State-driven UI that adapts to actual data
+- Professional empty states and loading indicators
 
 ## Essential Features
 
-### Dual-Zone File Upload System
-- **Functionality**: Two distinct upload zones for SEC regulatory filings vs public communications
-- **Purpose**: Segregate document types for cross-document triangulation analysis
-- **Trigger**: Drag-and-drop, click upload buttons, or zone clicking
-- **Progression**: File selection → validation → visual feedback → counter updates → ready for analysis
-- **Success criteria**: Files properly categorized, visual feedback immediate, size/format validation working
+### Document Upload System
+**Functionality**: Drag-and-drop file upload for SEC and public documents  
+**Purpose**: Secure document intake for forensic analysis  
+**Trigger**: User drags files or clicks upload zones  
+**Progression**: File selection → Upload confirmation → File count display → Analysis enablement  
+**Success criteria**: Files properly stored with accurate count display
 
-### Universal Forensic Analysis Engine
-- **Functionality**: 6 specialized detection modules analyzing documents for compliance violations
-- **Purpose**: Identify insider trading patterns, ESG greenwashing, litigation risks across any company
-- **Trigger**: Analysis button click after files uploaded
-- **Progression**: Document ingestion → triangulation → risk scoring → pattern detection → results compilation
-- **Success criteria**: All modules execute, risk scores calculated, cross-references identified
+### Analysis Engine
+**Functionality**: Multi-module document analysis with real progress tracking  
+**Purpose**: Detect potential legal violations and compliance issues  
+**Trigger**: User clicks analysis buttons after uploading files  
+**Progression**: Analysis start → Module activation → Progress tracking → Results generation  
+**Success criteria**: Analysis completes with accurate violation detection or clean bill
 
-### Comprehensive Results Display
-- **Functionality**: Collapsible sections showing analysis summary, anomalies, module results, recommendations
-- **Purpose**: Present complex forensic findings in organized, actionable format
-- **Trigger**: Analysis completion
-- **Progression**: Results generation → section population → color-coded risk display → interactive expansion
-- **Success criteria**: All findings displayed, risk color-coding accurate, sections expand/collapse smoothly
-
-### Multi-Format Export System
-- **Functionality**: Export results as forensic report, discrepancy matrix, executive analysis, complete package
-- **Purpose**: Enable further analysis and reporting in various professional formats
-- **Trigger**: Export button clicks
-- **Progression**: Format selection → data compilation → file generation → download trigger
-- **Success criteria**: All 4 formats generate correctly, files download properly, data structured appropriately
+### Evidence Package Generation
+**Functionality**: Export analysis results in prosecution-ready formats  
+**Purpose**: Provide actionable legal documentation  
+**Trigger**: Analysis completion with violations detected  
+**Progression**: Violation detection → Recovery calculation → Export option activation → Document generation  
+**Success criteria**: Professional legal documents generated for enforcement actions
 
 ## Edge Case Handling
-- **File Size Limits**: 500MB maximum with graceful rejection and clear messaging
-- **Invalid Formats**: Format validation with user-friendly error explanations
-- **Empty Uploads**: Clear guidance when no files selected for analysis
-- **Analysis Interruption**: Proper cleanup if user navigates away during processing
-- **Memory Management**: Efficient handling of large file processing without browser crashes
+
+**Empty System State**: Professional "no data" messaging instead of fake placeholders
+**Analysis with No Violations**: Clear "all clear" indication rather than zero counters
+**File Upload Errors**: Graceful error handling with specific guidance
+**Browser Memory Limits**: Real memory monitoring with performance warnings
+**Network Interruptions**: Analysis state preservation and recovery options
 
 ## Design Direction
-The design should feel like a high-tech forensic investigation tool with cyberpunk aesthetics - serious, professional, and cutting-edge while maintaining clarity and usability through a rich interface that showcases the platform's sophisticated capabilities.
+
+The interface projects serious forensic authority through a cyberpunk aesthetic that feels both cutting-edge and courtroom-appropriate. Clean, minimal design that emphasizes data clarity over visual flourishes.
 
 ## Color Selection
-Custom palette - Cyberpunk forensic theme with dark backgrounds and neon accents to convey technical sophistication and investigative precision.
 
-- **Primary Color**: Neon Green (#00ff41) - Commands attention for critical findings and primary actions
-- **Secondary Colors**: Dark Blues (#1a1a2e to #0a0a0a) - Professional background gradients that don't compete with content
-- **Accent Color**: Electric Purple (#8a2be2) - Critical risk indicators and high-priority alerts
+**Triadic** color scheme using forensic green, electric cyan, and warning red to communicate different system states and violation severities.
+
+- **Primary Color**: Forensic Green (oklch(0.75 0.25 145)) - Communicates system readiness and successful operations
+- **Secondary Colors**: Electric Cyan (oklch(0.7 0.2 200)) for information states, Warning Orange (oklch(0.7 0.15 60)) for caution
+- **Accent Color**: Critical Red (oklch(0.6 0.25 25)) for violations and dangerous actions
 - **Foreground/Background Pairings**: 
-  - Background (Dark #0a0a0a): Neon Green text (#00ff41) - Ratio 12.8:1 ✓
-  - Card (Dark Blue #1a1a2e): White text (#ffffff) - Ratio 8.9:1 ✓
-  - Primary (Neon Green #00ff41): Black text (#000000) - Ratio 12.8:1 ✓
-  - Accent (Electric Purple #8a2be2): White text (#ffffff) - Ratio 6.2:1 ✓
+  - Background (Deep Black #000000): Green text(oklch(0.75 0.25 145)) - Ratio 11.2:1 ✓
+  - Card (Dark Gray oklch(0.1 0.02 240)): White text(oklch(0.95 0 0)) - Ratio 14.8:1 ✓
+  - Primary (Forensic Green): Black text(oklch(0.05 0 0)) - Ratio 15.1:1 ✓
 
 ## Font Selection
-Typography should convey technical precision and forensic professionalism using monospace fonts that enhance the cyberpunk aesthetic while ensuring excellent readability for complex data analysis.
 
-- **Typographic Hierarchy**:
-  - H1 (System Title): Courier New Bold/32px/tight letter spacing
-  - H2 (Section Headers): Courier New Bold/24px/normal spacing
-  - H3 (Subsections): Courier New Semibold/18px/normal spacing  
-  - Body (Analysis Text): Courier New Regular/14px/relaxed line height
-  - Code (Metrics): Courier New Regular/12px/monospace alignment
+Monospace typography (Courier Prime) to emphasize the technical, forensic nature of the platform while maintaining excellent readability for legal document review.
+
+- **Typographic Hierarchy**: 
+  - H1 (System Title): Courier Prime Bold/24px/normal letter spacing
+  - H2 (Section Headers): Courier Prime Bold/16px/normal letter spacing  
+  - Body (Interface Text): Courier Prime Regular/14px/normal letter spacing
+  - Caption (Status Text): Courier Prime Regular/12px/normal letter spacing
 
 ## Animations
-Animations should enhance the forensic investigation experience with subtle, purposeful transitions that guide attention and provide satisfying feedback without distracting from the serious analytical work.
 
-- **Purposeful Meaning**: Smooth transitions reinforce the high-tech forensic theme while maintaining professional focus
-- **Hierarchy of Movement**: Upload zones get priority animation focus, followed by analysis progress, then results expansion
+Purposeful, subtle animations that enhance functionality without distraction. All motion serves to guide attention to important state changes or provide visual feedback for user actions.
+
+- **Purposeful Meaning**: Rotating activity indicators signal active processing, pulse effects highlight system readiness
+- **Hierarchy of Movement**: Critical violations get stronger animation emphasis than informational updates
 
 ## Component Selection
-- **Components**: Cards for upload zones and results sections, Buttons for primary actions, Progress bars for analysis phases, Badges for risk indicators, Collapsible sections for results organization
-- **Customizations**: Custom upload zones with glow effects, specialized progress indicators for forensic analysis phases, risk-colored badges for findings classification
-- **States**: Upload zones with hover glow, buttons with cyberpunk styling, inputs with neon focus states, results with expand/collapse animations
-- **Icon Selection**: Upload arrows, analysis gears, warning triangles for risks, download arrows for exports
-- **Spacing**: Generous padding using 4px base unit, consistent gaps between sections, breathing room around complex data displays
-- **Mobile**: Responsive layout with stacked upload zones on mobile, collapsible navigation, touch-friendly interactive elements with progressive enhancement for desktop features
+
+- **Components**: Cards for information grouping, Buttons with distinct states for actions, Progress bars for real operations only, Badges for status indicators
+- **Customizations**: Custom upload zones with drag-and-drop feedback, violation display cards with expandable evidence sections
+- **States**: Clear disabled/enabled states for all interactive elements, loading states only during actual processing
+- **Icon Selection**: Lucide icons for professional appearance - Shield for security, Activity for processing, AlertTriangle for violations
+- **Spacing**: Consistent 16px base unit with 8px subdivisions for tight layouts
+- **Mobile**: Single-column layout on mobile with collapsible sections for document upload and results
