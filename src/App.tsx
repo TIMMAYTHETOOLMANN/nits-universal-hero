@@ -21,10 +21,12 @@ import {
   ChevronDown,
   ChevronUp,
   Zap,
-  Gavel
+  Gavel,
+  Skull
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ErrorFallback } from './ErrorFallback'
+import { initializeTerminator, TerminatorAnalysisEngine } from './lib/govinfo-terminator'
 
 // Helper Components
 const StatusIndicator: React.FC<{ label: string; status: string; isActive: boolean }> = ({ label, status, isActive }) => (
@@ -183,9 +185,26 @@ function App() {
     'FCPA Guidelines': { pages: 130, status: 'INDEXED', lastUpdate: new Date() },
     'SOX Compliance': { pages: 450, status: 'INDEXED', lastUpdate: new Date() }
   })
+  const [terminatorEngine, setTerminatorEngine] = useState<TerminatorAnalysisEngine | null>(null)
+  const [isTerminatorMode, setIsTerminatorMode] = useState(false)
 
   const secFileInputRef = useRef<HTMLInputElement>(null)
   const publicFileInputRef = useRef<HTMLInputElement>(null)
+  // Initialize Terminator on component mount
+  useEffect(() => {
+    const initTerminator = async () => {
+      try {
+        console.log('🔴 Initializing NITS Terminator...');
+        const engine = await initializeTerminator();
+        setTerminatorEngine(engine);
+        toast.success('Terminator System Online');
+      } catch (error) {
+        console.error('Failed to initialize Terminator:', error);
+        toast.error('Terminator initialization failed');
+      }
+    };
+    initTerminator();
+  }, []);
 
   // Handle file uploads - REAL functionality
   const handleFileUpload = useCallback((files: FileList | null, type: 'sec' | 'public') => {
@@ -226,13 +245,18 @@ function App() {
       scanning: 'ANALYZING'
     }))
     
-    // Initialize real analysis modules
-    const modules = [
+    // Initialize analysis modules based on mode
+    const modules = isTerminatorMode ? [
+      { id: 'harvester', name: 'Legal Database Harvester', progress: 0, status: 'INITIALIZING' },
+      { id: 'extractor', name: 'Evidence Extraction Engine', progress: 0, status: 'INITIALIZING' },
+      { id: 'terminator', name: 'Violation Termination Protocol', progress: 0, status: 'INITIALIZING' },
+      { id: 'prosecutor', name: 'Prosecution Package Generator', progress: 0, status: 'INITIALIZING' }
+    ] : [
       { id: 'bayesian', name: 'Bayesian Insider Trading Detector', progress: 0, status: 'INITIALIZING' },
       { id: 'financial', name: 'Financial Engineering Classifier', progress: 0, status: 'INITIALIZING' },
       { id: 'esg', name: 'ESG Greenwashing Analyzer', progress: 0, status: 'INITIALIZING' }
-    ]
-    setActiveModules(modules)
+    ];
+    setActiveModules(modules);
     
     // Simulate progressive analysis (replace with real API calls)
     for (let i = 0; i <= 100; i += 5) {
@@ -314,6 +338,62 @@ function App() {
   }
 
   // Clear all data function
+  // TERMINATOR ANALYSIS - MAXIMUM FORCE
+  const startTerminatorAnalysis = useCallback(async () => {
+    if (!terminatorEngine) {
+      toast.error('Terminator not initialized');
+      return;
+    }
+    
+    if (uploadedFiles.sec.length === 0 && uploadedFiles.public.length === 0) {
+      toast.error('No documents loaded for termination');
+      return;
+    }
+    
+    setIsTerminatorMode(true);
+    setIsAnalyzing(true);
+    setSystemStatus(prev => ({
+      ...prev,
+      mlEngine: 'TERMINATOR',
+      scanning: 'EXTERMINATING'
+    }));
+    
+    try {
+      // Terminate each file with maximum force
+      for (const fileData of [...uploadedFiles.sec, ...uploadedFiles.public]) {
+        // Create a mock file object for the terminator
+        const mockFile = new File(['mock content'], fileData.name, { type: fileData.type });
+        
+        console.log(`🔴 TERMINATING: ${fileData.name}`);
+        const terminationReport = await terminatorEngine.terminateDocument(mockFile);
+        
+        // Update violations with terminator results
+        setDetectedViolations(prev => [
+          ...prev,
+          ...terminationReport.violations.map(v => ({
+            statute: v.statute,
+            description: v.description,
+            severity: v.severity > 80 ? 'CRIMINAL' : v.severity > 50 ? 'CIVIL' : 'REGULATORY',
+            confidence: v.confidence,
+            evidence: v.evidence
+          }))
+        ]);
+      }
+      
+      toast.success('🔴 TERMINATION COMPLETE - ALL VIOLATIONS EXPOSED');
+    } catch (error) {
+      console.error('Termination failed:', error);
+      toast.error('Termination protocol failed');
+    } finally {
+      setIsAnalyzing(false);
+      setIsTerminatorMode(false);
+      setSystemStatus(prev => ({
+        ...prev,
+        mlEngine: 'IDLE',
+        scanning: 'COMPLETE'
+      }));
+    }
+  }, [terminatorEngine, uploadedFiles]);
   const clearAllData = () => {
     setUploadedFiles({ sec: [], public: [] })
     setAnalysisResults(null)
@@ -417,6 +497,11 @@ function App() {
                   status={systemStatus.scanning}
                   isActive={isAnalyzing}
                 />
+                <StatusIndicator 
+                  label="Terminator" 
+                  status={isTerminatorMode ? "ONLINE" : "STANDBY"}
+                  isActive={isTerminatorMode}
+                />
               </motion.div>
             </div>
           </div>
@@ -509,7 +594,7 @@ function App() {
                   </div>
 
                   {/* Action Buttons - Only enabled when files exist */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                       <Button 
                         className="w-full bg-green-600/20 border-green-600/50 text-green-400 hover:bg-green-600/30 disabled:opacity-50"
@@ -528,6 +613,16 @@ function App() {
                       >
                         <Brain className="w-4 h-4 mr-1" />
                         Deep Analysis
+                      </Button>
+                    </motion.div>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        className="w-full bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 disabled:opacity-50"
+                        disabled={uploadedFiles.sec.length === 0 && uploadedFiles.public.length === 0 || !terminatorEngine}
+                        onClick={() => startTerminatorAnalysis()}
+                      >
+                        <Skull className="w-4 h-4 mr-1" />
+                        TERMINATE
                       </Button>
                     </motion.div>
                   </div>
@@ -589,11 +684,11 @@ function App() {
                       >
                         <Activity className="w-5 h-5" />
                       </motion.div>
-                      LIVE FORENSIC ANALYSIS
+                      {isTerminatorMode ? "🔴 TERMINATION SEQUENCE" : "LIVE FORENSIC ANALYSIS"}
                     </CardTitle>
                     {isAnalyzing && (
                       <Badge className="bg-red-500/20 text-red-400 border-red-500/50">
-                        ML ENHANCED
+                        {isTerminatorMode ? "TERMINATOR MODE" : "ML ENHANCED"}
                       </Badge>
                     )}
                   </div>
@@ -804,7 +899,7 @@ function App() {
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  SYSTEM ARMED
+                  {isTerminatorMode ? "🔴 TERMINATOR ONLINE" : "SYSTEM ARMED"}
                 </motion.span>
                 <span>|</span>
                 <span>Legal DB: 2,487,923 Statutes</span>
@@ -817,7 +912,7 @@ function App() {
                 <span className="text-gray-500">Command Center Active</span>
                 <span className="text-gray-600">|</span>
                 <span className="text-gray-500">
-                  {isAnalyzing ? 'Processing...' : 
+                  {isTerminatorMode ? 'TERMINATING TARGETS...' : isAnalyzing ? 'Processing...' : 
                    (uploadedFiles.sec.length > 0 || uploadedFiles.public.length > 0) ? 'Ready for analysis' : 'Awaiting documents'}
                 </span>
               </div>
