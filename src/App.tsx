@@ -187,6 +187,7 @@ function App() {
   })
   const [terminatorEngine, setTerminatorEngine] = useState<TerminatorAnalysisEngine | null>(null)
   const [isTerminatorMode, setIsTerminatorMode] = useState(false)
+  const [govAPIStatus, setGovAPIStatus] = useState<'INITIALIZING' | 'CONNECTED' | 'ERROR'>('INITIALIZING')
 
   const secFileInputRef = useRef<HTMLInputElement>(null)
   const publicFileInputRef = useRef<HTMLInputElement>(null)
@@ -197,9 +198,11 @@ function App() {
         console.log('🔴 Initializing NITS Terminator...');
         const engine = await initializeTerminator();
         setTerminatorEngine(engine);
+        setGovAPIStatus('CONNECTED');
         toast.success('Terminator System Online');
       } catch (error) {
         console.error('Failed to initialize Terminator:', error);
+        setGovAPIStatus('ERROR');
         toast.error('Terminator initialization failed');
       }
     };
@@ -499,8 +502,8 @@ function App() {
                 />
                 <StatusIndicator 
                   label="Terminator" 
-                  status={isTerminatorMode ? "ONLINE" : "STANDBY"}
-                  isActive={isTerminatorMode}
+                  status={govAPIStatus === 'CONNECTED' ? "ONLINE" : govAPIStatus}
+                  isActive={govAPIStatus === 'CONNECTED'}
                 />
               </motion.div>
             </div>
@@ -508,6 +511,30 @@ function App() {
         </motion.header>
 
         <div className="container mx-auto px-4 py-6 relative z-10">
+          {/* API Status Banner */}
+          {govAPIStatus !== 'CONNECTED' && (
+            <motion.div 
+              className={`mb-4 p-3 rounded-lg border ${
+                govAPIStatus === 'ERROR' 
+                  ? 'bg-red-900/20 border-red-500/50 text-red-400' 
+                  : 'bg-yellow-900/20 border-yellow-500/50 text-yellow-400'
+              }`}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  govAPIStatus === 'ERROR' ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'
+                }`} />
+                <span className="text-sm font-medium">
+                  {govAPIStatus === 'ERROR' 
+                    ? '🚫 GovInfo API Connection Failed' 
+                    : '⏳ Initializing Legal Database Connection...'}
+                </span>
+              </div>
+            </motion.div>
+          )}
+          
           <div className="grid grid-cols-12 gap-6">
             
             {/* LEFT PANEL: Document Upload */}
