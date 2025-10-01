@@ -35,6 +35,7 @@ import { AnalysisSummary } from './components/results/AnalysisSummary'
 import { FinancialMatrix } from './components/financial/FinancialMatrix'
 import { SystemConsole } from './components/console/SystemConsole'
 import { ErrorFallback } from './ErrorFallback'
+import { AdvancedVisualizationDashboard } from './components/visualizations/AdvancedVisualizationDashboard'
 
 // Import custom hooks
 import { useAnalysis } from './hooks/useAnalysis'
@@ -417,10 +418,19 @@ function App() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-900/50 border-gray-800 mx-4 mt-6">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-900/50 border-gray-800 mx-4 mt-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Eye size={16} />
               Command Center
+            </TabsTrigger>
+            <TabsTrigger value="visualizations" className="flex items-center gap-2">
+              <Activity size={16} />
+              Advanced Charts
+              {analysis.results && (
+                <Badge variant="outline" className="text-xs ml-1 bg-purple-500/20 text-purple-400">
+                  Enhanced
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="financial" className="flex items-center gap-2">
               <Calculator size={16} />
@@ -692,6 +702,17 @@ function App() {
                   </div>
                 </div>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Advanced Visualizations Tab */}
+          <TabsContent value="visualizations">
+            <div className="container mx-auto px-4 py-6">
+              <AdvancedVisualizationDashboard
+                violations={analysis.results?.violations || []}
+                analysisResults={analysis.results}
+                isAnalyzing={analysis.isAnalyzing}
+              />
             </div>
           </TabsContent>
 
