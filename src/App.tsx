@@ -39,6 +39,8 @@ import { ErrorFallback } from './ErrorFallback'
 import { AdvancedVisualizationDashboard } from './components/visualizations/AdvancedVisualizationDashboard'
 import { CommandPalette } from './components/command/CommandPalette'
 import { ShortcutGuide } from './components/command/ShortcutGuide'
+import { AlertSystem } from './components/alerts/AlertSystem'
+import { AlertTestPanel } from './components/alerts/AlertTestPanel'
 
 // Import custom hooks
 import { useAnalysis } from './hooks/useAnalysis'
@@ -46,6 +48,7 @@ import { useFileManagement } from './hooks/useFileManagement'
 import { useAutonomousTraining } from './hooks/useAutonomousTraining'
 import { usePenaltyCalculation } from './hooks/usePenaltyCalculation'
 import { useConsole } from './hooks/useConsole'
+import { useAlertManager } from './hooks/useAlertManager'
 
 // Enhanced Dashboard Components
 const StatusIndicator: React.FC<{ label: string; status: string; count: string }> = ({ label, status, count }) => (
@@ -238,12 +241,14 @@ function App() {
   const autonomousTraining = useAutonomousTraining()
   const penalties = usePenaltyCalculation()
   const systemConsole = useConsole()
+  const alertManager = useAlertManager()
 
   // Initialize legal fortification systems
   useEffect(() => {
     const initializeLegalSystems = async () => {
       try {
         systemConsole.addToConsole('⚖️ Initializing legal fortification systems...')
+        alertManager.addSystemAlert('NITS system initialization started')
         
         // Mock initialization for production readiness
         systemConsole.addToConsole('🔍 Starting legal document harvesting...')
@@ -253,9 +258,11 @@ function App() {
         await new Promise(resolve => setTimeout(resolve, 500))
         
         systemConsole.addToConsole('⚖️ LEGAL FORTIFICATION COMPLETE - SYSTEM ARMED')
+        alertManager.addSystemAlert('Legal fortification systems armed and ready', 'success')
       } catch (error) {
         console.error('Legal systems initialization error:', error)
         systemConsole.addToConsole('⚠️ Legal systems initialization completed with warnings')
+        alertManager.addSystemAlert('System initialization completed with warnings', 'warning')
       }
     }
     
@@ -266,6 +273,10 @@ function App() {
   useEffect(() => {
     if (analysis.results && !autonomousTraining.isTraining) {
       autonomousTraining.generateAutonomousPatterns(analysis.results, systemConsole.addToConsole)
+      alertManager.addTrainingAlert(
+        `Generated ${autonomousTraining.autonomousPatterns?.length || 0} new autonomous patterns`,
+        'success'
+      )
     }
   }, [analysis.results, autonomousTraining.isTraining])
 
@@ -275,6 +286,13 @@ function App() {
       penalties.calculatePenalties(analysis.results.violations, systemConsole.addToConsole)
     }
   }, [analysis.results?.violations])
+
+  // Process analysis results for alerts
+  useEffect(() => {
+    if (analysis.results) {
+      alertManager.processAnalysisResults(analysis.results)
+    }
+  }, [analysis.results])
 
   const handleAnalysisExecution = () => {
     // Convert autonomous patterns to the format expected by analysis
@@ -308,12 +326,17 @@ function App() {
     
     if (result.success) {
       toast.success(result.message)
+      alertManager.addSystemAlert(`${files?.length || 0} ${type.toUpperCase()} document${files?.length !== 1 ? 's' : ''} uploaded successfully`, 'success')
     } else {
       toast.error(result.message)
+      alertManager.addSystemAlert(result.message, 'warning')
     }
     
     if (result.errors) {
-      result.errors.forEach(error => toast.error(error))
+      result.errors.forEach(error => {
+        toast.error(error)
+        alertManager.addSystemAlert(error, 'warning')
+      })
     }
     
     systemConsole.addToConsole(result.message)
@@ -325,6 +348,7 @@ function App() {
     penalties.exportPenaltyMatrix(format)
     systemConsole.addToConsole(`Exported penalty matrix in ${format.toUpperCase()} format`)
     toast.success(`Evidence package exported in ${format.toUpperCase()} format`)
+    alertManager.addSystemAlert(`Evidence package exported in ${format.toUpperCase()} format`, 'success')
   }
 
   const handleSwitchTab = (tab: string) => {
@@ -335,9 +359,12 @@ function App() {
   const handleUpdateDatabase = () => {
     systemConsole.addToConsole('🔄 Initiating legal database update...')
     toast.success('Legal database update initiated')
+    alertManager.addDatabaseAlert('Legal database update initiated', 'info')
+    
     // Mock database update process
     setTimeout(() => {
       systemConsole.addToConsole('✅ Legal database synchronized with latest regulations')
+      alertManager.addDatabaseAlert('Legal database synchronized with latest regulations', 'success')
     }, 2000)
   }
 
@@ -345,9 +372,11 @@ function App() {
     if (autonomousTraining.isTraining) {
       systemConsole.addToConsole('🛑 Autonomous training system disabled')
       toast.success('Training system disabled')
+      alertManager.addTrainingAlert('Autonomous training system disabled')
     } else {
       systemConsole.addToConsole('🚀 Autonomous training system activated')
       toast.success('Training system activated')
+      alertManager.addTrainingAlert('Autonomous training system activated', 'success')
     }
     // Training toggle logic would be handled by the autonomousTraining hook
   }
@@ -357,6 +386,7 @@ function App() {
     fileManagement.clearFiles('glamour')
     systemConsole.addToConsole('🗑️ All documents cleared from system')
     toast.success('All documents cleared')
+    alertManager.addSystemAlert('All documents cleared from system', 'info')
   }
 
   const canExecuteAnalysis = fileManagement.getTotalFileCount() > 0
@@ -716,6 +746,9 @@ function App() {
 
                   {/* Keyboard Shortcuts Guide */}
                   <ShortcutGuide />
+
+                  {/* Alert System Testing Panel */}
+                  <AlertTestPanel />
                 </div>
               </div>
             </div>
@@ -819,6 +852,16 @@ function App() {
         />
 
         <Toaster />
+
+        {/* Real-time Alert System */}
+        <AlertSystem
+          alerts={alertManager.alerts}
+          onDismiss={alertManager.dismissAlert}
+          onDismissAll={alertManager.dismissAll}
+          onMarkAsRead={alertManager.markAsRead}
+          maxVisibleAlerts={5}
+          autoHideDelay={8000}
+        />
       </div>
     </ErrorBoundary>
   )

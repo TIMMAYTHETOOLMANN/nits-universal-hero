@@ -69,6 +69,17 @@
 - **Purpose**: Provide detailed financial exposure analysis for decision-making
 - **Success Criteria**: Per-violation details, statutory references, total exposure
 
+### 7. Real-Time Alert System
+- **Functionality**: Intelligent notification system for critical findings and system events
+- **Purpose**: Immediate notification of critical violations requiring urgent attention
+- **Success Criteria**: 
+  - Categorized alerts (critical, warning, info, success)
+  - Auto-dismiss for non-critical alerts
+  - Sticky alerts for criminal violations
+  - Integration with analysis engine for automatic alert generation
+  - Confidence scoring and statutory references
+  - Real-time system status updates
+
 ## Design Direction
 
 ### Visual Tone & Identity

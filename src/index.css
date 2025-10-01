@@ -1,4 +1,5 @@
 @import "tw-animate-css";
+@import 'tailwindcss';
 
 @layer base {
   * {
@@ -543,6 +544,63 @@
 
 .temporal-sequence-expand {
   animation: temporalExpand 0.3s ease-out;
+}
+
+/* Real-time Alert System styling */
+.alert-system-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 384px;
+  z-index: 50;
+}
+
+.alert-item {
+  background: linear-gradient(135deg, 
+    oklch(0.08 0.02 240 / 0.95), 
+    oklch(0.12 0.02 240 / 0.95)
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid oklch(0.2 0.05 240);
+  transition: all 0.3s ease;
+}
+
+.alert-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px oklch(0 0 0 / 0.3);
+}
+
+.alert-critical {
+  border-color: oklch(0.6 0.25 25 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.6 0.25 25 / 0.1), 
+    oklch(0.08 0.02 240 / 0.9)
+  );
+  box-shadow: 0 0 20px oklch(0.6 0.25 25 / 0.2);
+}
+
+.alert-warning {
+  border-color: oklch(0.7 0.15 60 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.7 0.15 60 / 0.1), 
+    oklch(0.08 0.02 240 / 0.9)
+  );
+}
+
+.alert-success {
+  border-color: oklch(0.75 0.25 145 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.25 145 / 0.1), 
+    oklch(0.08 0.02 240 / 0.9)
+  );
+}
+
+.alert-info {
+  border-color: oklch(0.7 0.2 200 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.7 0.2 200 / 0.1), 
+    oklch(0.08 0.02 240 / 0.9)
+  );
 }
 
 /* Command Palette Styling */
