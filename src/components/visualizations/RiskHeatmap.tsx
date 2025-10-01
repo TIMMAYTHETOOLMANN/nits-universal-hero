@@ -7,12 +7,12 @@ interface RiskHeatmapProps {
 }
 
 export const RiskHeatmap: React.FC<RiskHeatmapProps> = ({ violations = [] }) => {
-  const [selectedCell, setSelectedCell] = useState<{ category: string; quarter: string } | null>(null)
+  const [selectedCell, setSelectedCell] = useState<{category: string, quarter: string} | null>(null)
 
-  // Generate risk data based on violations or use mock data
   const generateRiskData = () => {
     if (violations.length > 0) {
       const categories = ['Financial', 'Regulatory', 'Operational', 'Legal']
+      
       return categories.map(category => ({
         category,
         q1: Math.floor(Math.random() * 10) + 1,
@@ -72,7 +72,7 @@ export const RiskHeatmap: React.FC<RiskHeatmapProps> = ({ violations = [] }) => 
               <div className="text-sm text-gray-300 font-medium py-2">
                 {row.category}
               </div>
-              {['q1', 'q2', 'q3', 'q4'].map((quarter, colIdx) => {
+              {['q1', 'q2', 'q3', 'q4'].map((quarter) => {
                 const value = row[quarter as keyof typeof row] as number
                 const isSelected = selectedCell?.category === row.category && 
                                  selectedCell?.quarter === quarter.toUpperCase()
@@ -110,22 +110,11 @@ export const RiskHeatmap: React.FC<RiskHeatmapProps> = ({ violations = [] }) => 
                 {selectedCell.category} - {selectedCell.quarter}
               </span>
               <Badge className={`text-xs ${
-                getRiskLevel(
+                getRiskColor(
                   riskData.find(r => r.category === selectedCell.category)?.[
                     selectedCell.quarter.toLowerCase() as keyof typeof riskData[0]
                   ] as number || 0
-                ) === 'CRITICAL' ? 'bg-red-500/20 text-red-400' :
-                getRiskLevel(
-                  riskData.find(r => r.category === selectedCell.category)?.[
-                    selectedCell.quarter.toLowerCase() as keyof typeof riskData[0]
-                  ] as number || 0
-                ) === 'HIGH' ? 'bg-orange-500/20 text-orange-400' :
-                getRiskLevel(
-                  riskData.find(r => r.category === selectedCell.category)?.[
-                    selectedCell.quarter.toLowerCase() as keyof typeof riskData[0]
-                  ] as number || 0
-                ) === 'MEDIUM' ? 'bg-yellow-500/20 text-yellow-400' :
-                'bg-green-500/20 text-green-400'
+                ).replace('bg-', 'text-').replace('/70', '').replace(' border-', ' bg-').replace(' text-', ' border-')
               }`}>
                 {getRiskLevel(
                   riskData.find(r => r.category === selectedCell.category)?.[
@@ -134,44 +123,11 @@ export const RiskHeatmap: React.FC<RiskHeatmapProps> = ({ violations = [] }) => 
                 )}
               </Badge>
             </div>
-            <div className="text-xs text-gray-400">
-              <div className="mb-1">
-                <span>Violations Detected:</span>
-                <span className="ml-2 text-gray-300">
-                  {Math.floor(Math.random() * 5) + 1} instances
-                </span>
-              </div>
-              <div>
-                <span>Risk Assessment:</span>
-                <span className="ml-2 text-gray-300">
-                  Based on pattern analysis and regulatory compliance
-                </span>
-              </div>
-            </div>
+            <p className="text-xs text-gray-400">
+              Risk level assessment for {selectedCell.category} violations in {selectedCell.quarter}
+            </p>
           </div>
         )}
-        
-        <div className="flex items-center justify-between text-xs text-gray-500 mt-4 pt-3 border-t border-gray-800">
-          <span>Risk Threshold Legend:</span>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-green-500/50 rounded border border-green-500/70" />
-              <span>Low (1-2)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-yellow-500/50 rounded border border-yellow-500/70" />
-              <span>Med (3-4)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-orange-500/50 rounded border border-orange-500/70" />
-              <span>High (5-7)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-red-500/50 rounded border border-red-500/70" />
-              <span>Critical (8+)</span>
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   )
