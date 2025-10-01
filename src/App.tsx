@@ -440,6 +440,21 @@ function App() {
           />
         </div>
 
+        {/* Terminator Status Badge - Fixed Position */}
+        {govAPIStatus === 'CONNECTED' && (
+          <div className="fixed top-4 right-4 z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+            >
+              <Badge className="bg-red-600 text-white animate-pulse px-3 py-1 text-sm font-bold shadow-lg shadow-red-600/50">
+                🔴 TERMINATOR ACTIVE
+              </Badge>
+            </motion.div>
+          </div>
+        )}
+
         {/* HEADER - Shows REAL status */}
         <motion.header 
           className="border-b border-green-500/30 bg-black/50 backdrop-blur-xl relative z-10"
@@ -473,7 +488,7 @@ function App() {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
                   >
-                    LEGAL FORTIFICATION SYSTEM v3.0
+                    LEGAL FORTIFICATION SYSTEM v3.0 - TERMINATOR ENABLED
                   </motion.p>
                 </div>
               </div>
