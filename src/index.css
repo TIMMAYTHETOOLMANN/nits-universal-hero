@@ -545,6 +545,35 @@
   animation: temporalExpand 0.3s ease-out;
 }
 
+/* Enhanced component animations */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
 /* Sophisticated coordination indicators */
 .coordination-indicator-high {
   color: oklch(0.6 0.25 25);

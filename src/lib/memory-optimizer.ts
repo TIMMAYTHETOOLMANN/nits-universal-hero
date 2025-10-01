@@ -83,11 +83,18 @@ export class MemoryOptimizer {
     }
     
     if (Array.isArray(obj)) {
-      return obj.reduce((sum, item) => sum + this.estimateSize(item), 0)
+      return obj.reduce((sum: number, item) => {
+        const size = this.estimateSize(item)
+        return sum + (typeof size === 'number' ? size : 0)
+      }, 0)
     }
     
-    if (typeof obj === 'object') {
-      return Object.values(obj).reduce((sum, val) => sum + this.estimateSize(val), 0)
+    if (typeof obj === 'object' && obj !== null) {
+      // @ts-ignore - TypeScript inference issue with reduce callback
+      return Object.values(obj).reduce((sum: number, val) => {
+        const size = this.estimateSize(val)
+        return sum + (typeof size === 'number' ? size : 0)
+      }, 0)
     }
     
     return 0
