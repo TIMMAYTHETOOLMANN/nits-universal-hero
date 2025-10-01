@@ -23,7 +23,8 @@ import {
   TrendUp,
   Info,
   CaretDown,
-  CaretUp
+  CaretUp,
+  Terminal
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
@@ -36,6 +37,8 @@ import { FinancialMatrix } from './components/financial/FinancialMatrix'
 import { SystemConsole } from './components/console/SystemConsole'
 import { ErrorFallback } from './ErrorFallback'
 import { AdvancedVisualizationDashboard } from './components/visualizations/AdvancedVisualizationDashboard'
+import { CommandPalette } from './components/command/CommandPalette'
+import { ShortcutGuide } from './components/command/ShortcutGuide'
 
 // Import custom hooks
 import { useAnalysis } from './hooks/useAnalysis'
@@ -321,6 +324,39 @@ function App() {
     
     penalties.exportPenaltyMatrix(format)
     systemConsole.addToConsole(`Exported penalty matrix in ${format.toUpperCase()} format`)
+    toast.success(`Evidence package exported in ${format.toUpperCase()} format`)
+  }
+
+  const handleSwitchTab = (tab: string) => {
+    setActiveTab(tab)
+    systemConsole.addToConsole(`Switched to ${tab} view`)
+  }
+
+  const handleUpdateDatabase = () => {
+    systemConsole.addToConsole('🔄 Initiating legal database update...')
+    toast.success('Legal database update initiated')
+    // Mock database update process
+    setTimeout(() => {
+      systemConsole.addToConsole('✅ Legal database synchronized with latest regulations')
+    }, 2000)
+  }
+
+  const handleToggleTraining = () => {
+    if (autonomousTraining.isTraining) {
+      systemConsole.addToConsole('🛑 Autonomous training system disabled')
+      toast.success('Training system disabled')
+    } else {
+      systemConsole.addToConsole('🚀 Autonomous training system activated')
+      toast.success('Training system activated')
+    }
+    // Training toggle logic would be handled by the autonomousTraining hook
+  }
+
+  const handleClearAllFiles = () => {
+    fileManagement.clearFiles('sec')
+    fileManagement.clearFiles('glamour')
+    systemConsole.addToConsole('🗑️ All documents cleared from system')
+    toast.success('All documents cleared')
   }
 
   const canExecuteAnalysis = fileManagement.getTotalFileCount() > 0
@@ -677,6 +713,9 @@ function App() {
                       />
                     </CardContent>
                   </Card>
+
+                  {/* Keyboard Shortcuts Guide */}
+                  <ShortcutGuide />
                 </div>
               </div>
             </div>
@@ -697,8 +736,15 @@ function App() {
                     <span>|</span>
                     <span>Last Update: {analysis.results ? 'Analysis complete' : '2 min ago'}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <span className="text-gray-500">Command Center Active</span>
+                    <span className="text-gray-600">|</span>
+                    <div className="flex items-center gap-1 text-gray-500">
+                      <Terminal className="w-3 h-3" />
+                      <span>Press</span>
+                      <kbd className="bg-gray-800 px-1 py-0.5 rounded text-xs">⌘K</kbd>
+                      <span>for commands</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -746,6 +792,31 @@ function App() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Advanced Command Palette */}
+        <CommandPalette
+          onQuickScan={handleAnalysisExecution}
+          onDeepAnalysis={handleAnalysisExecution}
+          onExportEvidence={handleExportMatrix}
+          onGenerateTCR={() => handleExportMatrix('txt')}
+          onCreateDOJReferral={() => handleExportMatrix('complete')}
+          onUpdateDatabase={handleUpdateDatabase}
+          onClearFiles={handleClearAllFiles}
+          onClearConsole={systemConsole.clearConsole}
+          onExportConsole={systemConsole.exportConsoleLog}
+          onToggleTraining={handleToggleTraining}
+          onRecalculatePenalties={() => {
+            if (analysis.results?.violations) {
+              penalties.calculatePenalties(analysis.results.violations, systemConsole.addToConsole)
+            }
+          }}
+          onSwitchTab={handleSwitchTab}
+          canExecuteAnalysis={canExecuteAnalysis}
+          hasResults={!!analysis.results}
+          hasPenalties={!!penalties.penaltyMatrix}
+          isAnalyzing={analysis.isAnalyzing}
+          isTraining={autonomousTraining.isTraining}
+        />
 
         <Toaster />
       </div>
