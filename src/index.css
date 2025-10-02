@@ -12,184 +12,55 @@
     color: var(--foreground);
   }
   
-  /* Force dark mode by default */
+  /* Enhanced Dark Mode by Default */
   html {
     color-scheme: dark;
   }
 }
 
-/* Custom color scheme for forensic theme */
-@layer utilities {
-  .bg-gradient-forensic {
-    background: linear-gradient(135deg, #00ff00 0%, #00ffff 100%);
-  }
-  
-  .bg-gradient-forensic-subtle {
-    background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
-  }
-  
-  .text-gradient-forensic {
-    background: linear-gradient(135deg, #00ff00 0%, #00ffff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .glassmorphism {
-    backdrop-filter: blur(10px);
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .matrix-glow {
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-  }
-  
-  .cyber-glow {
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-  }
-}
-
+/* Enhanced Cyberpunk Forensic Theme */
 :root {
-  /* Cyberpunk Forensic Theme */
-  --background: oklch(0.05 0 0);
-  --foreground: oklch(0.9 0.05 145);
+  /* Enhanced color palette for latest version */
+  --background: oklch(0.03 0 0);
+  --foreground: oklch(0.92 0.05 145);
   
-  --card: oklch(0.1 0.02 240);
-  --card-foreground: oklch(0.95 0 0);
+  --card: oklch(0.08 0.02 240);
+  --card-foreground: oklch(0.97 0 0);
   
-  --popover: oklch(0.08 0.02 240);
-  --popover-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.06 0.02 240);
+  --popover-foreground: oklch(0.97 0 0);
   
-  --primary: oklch(0.75 0.25 145);
-  --primary-foreground: oklch(0.05 0 0);
+  --primary: oklch(0.78 0.25 145);
+  --primary-foreground: oklch(0.03 0 0);
   
-  --secondary: oklch(0.15 0.03 240);
-  --secondary-foreground: oklch(0.85 0.05 145);
+  --secondary: oklch(0.12 0.03 240);
+  --secondary-foreground: oklch(0.88 0.05 145);
   
-  --muted: oklch(0.12 0.02 240);
-  --muted-foreground: oklch(0.6 0.05 145);
+  --muted: oklch(0.10 0.02 240);
+  --muted-foreground: oklch(0.65 0.05 145);
   
-  --accent: oklch(0.65 0.3 300);
-  --accent-foreground: oklch(0.95 0 0);
+  --accent: oklch(0.68 0.3 300);
+  --accent-foreground: oklch(0.97 0 0);
   
-  --destructive: oklch(0.6 0.25 25);
-  --destructive-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.62 0.25 25);
+  --destructive-foreground: oklch(0.97 0 0);
   
-  --border: oklch(0.2 0.05 240);
-  --input: oklch(0.15 0.03 240);
-  --ring: oklch(0.75 0.25 145);
+  --border: oklch(0.18 0.05 240);
+  --input: oklch(0.13 0.03 240);
+  --ring: oklch(0.78 0.25 145);
   
   --radius: 0.5rem;
   
-  /* Custom forensic colors */
-  --neon-green: oklch(0.75 0.25 145);
-  --electric-purple: oklch(0.65 0.3 300);
-  --cyber-blue: oklch(0.1 0.02 240);
-  --warning-orange: oklch(0.7 0.15 60);
-  --critical-red: oklch(0.6 0.25 25);
+  /* Enhanced custom forensic colors */
+  --neon-green: oklch(0.78 0.25 145);
+  --electric-purple: oklch(0.68 0.3 300);
+  --cyber-blue: oklch(0.08 0.02 240);
+  --warning-orange: oklch(0.72 0.15 60);
+  --critical-red: oklch(0.62 0.25 25);
+  --terminator-red: oklch(0.55 0.3 25);
 }
 
-/* Theme mapping for components */
-:root {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  
-  --radius-sm: calc(var(--radius) * 0.5);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) * 1.5);
-  --radius-xl: calc(var(--radius) * 2);
-  --radius-2xl: calc(var(--radius) * 3);
-  --radius-full: 9999px;
-}
-
-/* Custom cyberpunk effects */
-.glow-effect {
-  box-shadow: 0 0 20px oklch(0.75 0.25 145 / 0.3);
-}
-
-.upload-zone {
-  border: 2px dashed oklch(0.75 0.25 145 / 0.5);
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.8), 
-    oklch(0.12 0.02 240 / 0.8)
-  );
-  transition: all 0.3s ease;
-}
-
-.upload-zone:hover {
-  border-color: oklch(0.75 0.25 145);
-  box-shadow: 0 0 30px oklch(0.75 0.25 145 / 0.2);
-  transform: scale(1.02);
-}
-
-.upload-zone.drag-over {
-  border-color: oklch(0.75 0.25 145);
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.1), 
-    oklch(0.65 0.3 300 / 0.1)
-  );
-  box-shadow: 0 0 40px oklch(0.75 0.25 145 / 0.4);
-}
-
-.risk-low { color: oklch(0.75 0.25 145); }
-.risk-medium { color: oklch(0.7 0.15 60); }
-.risk-high { color: oklch(0.6 0.25 25); }
-.risk-critical { color: oklch(0.65 0.3 300); }
-
-.text-warning-orange { color: oklch(0.7 0.15 60); }
-
-.console-output {
-  background: oklch(0.05 0 0);
-  border: 1px solid oklch(0.2 0.05 240);
-  font-family: 'Courier Prime', monospace;
-  color: oklch(0.75 0.25 145);
-}
-
-.analysis-progress {
-  background: linear-gradient(90deg, 
-    oklch(0.75 0.25 145) 0%, 
-    oklch(0.65 0.3 300) 100%
-  );
-}
-
-/* Download enhanced styles */
-.download-button {
-  transition: all 0.3s ease;
-}
-
-.download-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px oklch(0.75 0.25 145 / 0.2);
-}
-
-.file-type-icon {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.2), 
-    oklch(0.65 0.3 300 / 0.2)
-  );
-  border-radius: 50%;
-  padding: 8px;
-  margin-bottom: 8px;
-}
-
+/* Enhanced Theme mapping for components */
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -219,543 +90,336 @@
   --radius-full: 9999px;
 }
 
-/* Custom cyberpunk effects */
+/* Enhanced custom cyberpunk effects */
 .glow-effect {
-  box-shadow: 0 0 20px oklch(0.75 0.25 145 / 0.3);
+  box-shadow: 0 0 20px oklch(0.78 0.25 145 / 0.3);
+}
+
+.terminator-glow {
+  box-shadow: 0 0 25px oklch(0.55 0.3 25 / 0.4);
+  border: 1px solid oklch(0.55 0.3 25 / 0.5);
 }
 
 .upload-zone {
-  border: 2px dashed oklch(0.75 0.25 145 / 0.5);
+  border: 2px dashed oklch(0.78 0.25 145 / 0.5);
   background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.8), 
-    oklch(0.12 0.02 240 / 0.8)
+    oklch(0.06 0.02 240 / 0.8), 
+    oklch(0.10 0.02 240 / 0.8)
   );
   transition: all 0.3s ease;
 }
 
 .upload-zone:hover {
-  border-color: oklch(0.75 0.25 145);
-  box-shadow: 0 0 30px oklch(0.75 0.25 145 / 0.2);
+  border-color: oklch(0.78 0.25 145);
+  box-shadow: 0 0 30px oklch(0.78 0.25 145 / 0.2);
   transform: scale(1.02);
 }
 
 .upload-zone.drag-over {
-  border-color: oklch(0.75 0.25 145);
+  border-color: oklch(0.78 0.25 145);
   background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.1), 
-    oklch(0.65 0.3 300 / 0.1)
+    oklch(0.78 0.25 145 / 0.1), 
+    oklch(0.68 0.3 300 / 0.1)
   );
-  box-shadow: 0 0 40px oklch(0.75 0.25 145 / 0.4);
+  box-shadow: 0 0 40px oklch(0.78 0.25 145 / 0.4);
 }
 
-.risk-low { color: oklch(0.75 0.25 145); }
-.risk-medium { color: oklch(0.7 0.15 60); }
-.risk-high { color: oklch(0.6 0.25 25); }
-.risk-critical { color: oklch(0.65 0.3 300); }
+/* Enhanced risk indicators */
+.risk-low { color: oklch(0.78 0.25 145); }
+.risk-medium { color: oklch(0.72 0.15 60); }
+.risk-high { color: oklch(0.62 0.25 25); }
+.risk-critical { 
+  color: oklch(0.55 0.3 25);
+  text-shadow: 0 0 10px oklch(0.55 0.3 25 / 0.5);
+}
 
-.text-warning-orange { color: oklch(0.7 0.15 60); }
+.text-warning-orange { color: oklch(0.72 0.15 60); }
 
+/* Enhanced console styling */
 .console-output {
-  background: oklch(0.05 0 0);
-  border: 1px solid oklch(0.2 0.05 240);
+  background: oklch(0.03 0 0);
+  border: 1px solid oklch(0.18 0.05 240);
   font-family: 'Courier Prime', monospace;
-  color: oklch(0.75 0.25 145);
+  color: oklch(0.78 0.25 145);
 }
 
 .analysis-progress {
   background: linear-gradient(90deg, 
-    oklch(0.75 0.25 145) 0%, 
-    oklch(0.65 0.3 300) 100%
+    oklch(0.78 0.25 145) 0%, 
+    oklch(0.68 0.3 300) 100%
   );
 }
 
-/* Pattern training interface styles */
-.pattern-badge {
-  transition: all 0.2s ease;
+/* Enhanced terminator mode styling */
+.terminator-mode {
+  background: linear-gradient(135deg, 
+    oklch(0.55 0.3 25 / 0.1), 
+    oklch(0.03 0 0 / 0.9)
+  );
+  border: 1px solid oklch(0.55 0.3 25 / 0.3);
 }
 
-.pattern-badge:hover {
-  transform: scale(1.05);
+.terminator-text {
+  color: oklch(0.55 0.3 25);
+  text-shadow: 0 0 10px oklch(0.55 0.3 25 / 0.3);
 }
 
-.pattern-creation-form {
+/* Enhanced legal system status indicators */
+.legal-system-online {
+  background: linear-gradient(135deg, 
+    oklch(0.78 0.25 145 / 0.2), 
+    oklch(0.68 0.3 300 / 0.1)
+  );
+  border: 1px solid oklch(0.78 0.25 145 / 0.3);
+}
+
+.legal-system-harvesting {
+  background: linear-gradient(135deg, 
+    oklch(0.68 0.3 300 / 0.2), 
+    oklch(0.78 0.25 145 / 0.1)
+  );
+  border: 1px solid oklch(0.68 0.3 300 / 0.3);
+  animation: pulse 2s infinite;
+}
+
+/* Enhanced violation display */
+.violation-critical {
+  background: linear-gradient(135deg, 
+    oklch(0.55 0.3 25 / 0.1), 
+    oklch(0.62 0.25 25 / 0.05)
+  );
+  border: 1px solid oklch(0.55 0.3 25 / 0.3);
+  box-shadow: 0 0 15px oklch(0.55 0.3 25 / 0.2);
+}
+
+.violation-civil {
+  background: linear-gradient(135deg, 
+    oklch(0.72 0.15 60 / 0.1), 
+    oklch(0.72 0.15 60 / 0.05)
+  );
+  border: 1px solid oklch(0.72 0.15 60 / 0.3);
+}
+
+.violation-regulatory {
+  background: linear-gradient(135deg, 
+    oklch(0.78 0.25 145 / 0.1), 
+    oklch(0.78 0.25 145 / 0.05)
+  );
+  border: 1px solid oklch(0.78 0.25 145 / 0.3);
+}
+
+/* Enhanced metrics cards */
+.metric-card {
   background: linear-gradient(135deg, 
     oklch(0.08 0.02 240 / 0.9), 
     oklch(0.12 0.02 240 / 0.9)
   );
-  border: 1px solid oklch(0.2 0.05 240);
-}
-
-.pattern-test-success {
-  color: oklch(0.75 0.25 145);
-  background: oklch(0.75 0.25 145 / 0.1);
-}
-
-.pattern-test-warning {
-  color: oklch(0.7 0.15 60);
-  background: oklch(0.7 0.15 60 / 0.1);
-}
-
-.pattern-test-error {
-  color: oklch(0.6 0.25 25);
-  background: oklch(0.6 0.25 25 / 0.1);
-}
-
-/* Autonomous training interface styles */
-.auto-training-active {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300 / 0.1), 
-    oklch(0.75 0.25 145 / 0.1)
-  );
-  border: 1px solid oklch(0.65 0.3 300 / 0.3);
-}
-
-.training-progress-glow {
-  box-shadow: 0 0 20px oklch(0.65 0.3 300 / 0.4);
-}
-
-.auto-pattern-badge {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300 / 0.2), 
-    oklch(0.75 0.25 145 / 0.2)
-  );
-  border: 1px solid oklch(0.65 0.3 300 / 0.5);
-  color: oklch(0.65 0.3 300);
-}
-
-/* Enhanced download feedback styles */
-.download-card {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-}
-
-.download-success {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.1), 
-    oklch(0.75 0.25 145 / 0.05)
-  );
-  border: 1px solid oklch(0.75 0.25 145 / 0.3);
-}
-
-.download-button {
+  border: 1px solid oklch(0.18 0.05 240);
   transition: all 0.3s ease;
 }
 
-.download-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px oklch(0.75 0.25 145 / 0.2);
-}
-
-.download-instructions {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300 / 0.1), 
-    oklch(0.65 0.3 300 / 0.05)
-  );
-  border: 1px solid oklch(0.65 0.3 300 / 0.2);
-}
-
-/* Download notification animations */
-@keyframes downloadPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.download-notification {
-  animation: downloadPulse 2s infinite;
-}
-
-/* File type icons styling */
-.file-type-icon {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.2), 
-    oklch(0.65 0.3 300 / 0.2)
-  );
-  border-radius: 50%;
-  padding: 8px;
-  margin-bottom: 8px;
-}
-
-/* SEC Penalty calculation styling */
-.sec-penalty-card {
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.15 60 / 0.1), 
-    oklch(0.6 0.25 25 / 0.1)
-  );
-  border: 1px solid oklch(0.7 0.15 60 / 0.3);
-}
-
-.penalty-calculation-item {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-  transition: all 0.2s ease;
-}
-
-.penalty-calculation-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px oklch(0.7 0.15 60 / 0.2);
-}
-
-.penalty-total-glow {
-  background: linear-gradient(135deg, 
-    oklch(0.6 0.25 25 / 0.1), 
-    oklch(0.7 0.15 60 / 0.1)
-  );
-  border: 1px solid oklch(0.6 0.25 25 / 0.3);
-  box-shadow: 0 0 20px oklch(0.6 0.25 25 / 0.2);
-}
-
-.sec-citation-text {
-  color: oklch(0.65 0.3 300);
-  font-size: 0.75rem;
-  font-style: italic;
-}
-
-/* Cross-pattern correlation styling */
-.correlation-network-card {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300 / 0.1), 
-    oklch(0.75 0.25 145 / 0.1)
-  );
-  border: 1px solid oklch(0.65 0.3 300 / 0.3);
-}
-
-.correlation-strength-indicator {
-  background: linear-gradient(90deg, 
-    oklch(0.75 0.25 145) 0%, 
-    oklch(0.65 0.3 300) 100%
-  );
-  height: 4px;
-  border-radius: 2px;
-}
-
-.sophistication-meter {
-  background: linear-gradient(135deg, 
-    oklch(0.6 0.25 25 / 0.2), 
-    oklch(0.7 0.15 60 / 0.2)
-  );
-  border: 1px solid oklch(0.6 0.25 25 / 0.3);
-}
-
-.network-complexity-glow {
-  box-shadow: 0 0 15px oklch(0.65 0.3 300 / 0.3);
-}
-
-.cascade-level-indicator {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.2), 
-    oklch(0.65 0.3 300 / 0.2)
-  );
-  border-left: 3px solid oklch(0.65 0.3 300);
-}
-
-.correlation-type-badge {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.65 0.3 300 / 0.5);
-  color: oklch(0.65 0.3 300);
-}
-
-.multilevel-violation-hierarchy {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border-left: 4px solid oklch(0.7 0.15 60);
-}
-
-/* Enhanced download system styling */
-.download-enhanced {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.1), 
-    oklch(0.65 0.3 300 / 0.1)
-  );
-  border: 1px solid oklch(0.75 0.25 145 / 0.3);
-}
-
-.download-success-notification {
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.2), 
-    oklch(0.75 0.25 145 / 0.1)
-  );
-  border: 1px solid oklch(0.75 0.25 145 / 0.4);
-  box-shadow: 0 0 15px oklch(0.75 0.25 145 / 0.3);
-}
-
-/* Temporal Sequence Analysis styling */
-.temporal-sequence-card {
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.15 60 / 0.1), 
-    oklch(0.65 0.3 300 / 0.05)
-  );
-  border: 1px solid oklch(0.7 0.15 60 / 0.3);
-}
-
-.temporal-period-indicator {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300 / 0.1), 
-    oklch(0.75 0.25 145 / 0.1)
-  );
-  border-left: 4px solid oklch(0.65 0.3 300);
-}
-
-.coordination-metrics-grid {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-}
-
-.temporal-sophistication-badge {
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.15 60 / 0.2), 
-    oklch(0.6 0.25 25 / 0.2)
-  );
-  border: 1px solid oklch(0.7 0.15 60 / 0.5);
-  color: oklch(0.7 0.15 60);
-}
-
-.sequence-timeline-item {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-  transition: all 0.2s ease;
-}
-
-.sequence-timeline-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px oklch(0.7 0.15 60 / 0.2);
-}
-
-.temporal-coordination-glow {
-  box-shadow: 0 0 20px oklch(0.7 0.15 60 / 0.3);
-}
-
-.multi-period-indicator {
-  background: linear-gradient(90deg, 
-    oklch(0.7 0.15 60) 0%, 
-    oklch(0.65 0.3 300) 50%,
-    oklch(0.75 0.25 145) 100%
-  );
-  height: 3px;
-  border-radius: 1.5px;
-}
-
-.sequence-event-marker {
-  background: linear-gradient(135deg, 
-    oklch(0.65 0.3 300), 
-    oklch(0.75 0.25 145)
-  );
-  box-shadow: 0 0 8px oklch(0.65 0.3 300 / 0.5);
-}
-
-.temporal-analysis-summary {
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.15 60 / 0.15), 
-    oklch(0.65 0.3 300 / 0.1)
-  );
-  border: 1px solid oklch(0.7 0.15 60 / 0.2);
-}
-
-/* Animation for temporal sequence expansion */
-@keyframes temporalExpand {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.temporal-sequence-expand {
-  animation: temporalExpand 0.3s ease-out;
-}
-
-/* Real-time Alert System styling */
-.alert-system-container {
-  position: fixed;
-  top: 80px;
-  right: 16px;
-  width: 384px;
-  z-index: 50;
-}
-
-.alert-item {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.95), 
-    oklch(0.12 0.02 240 / 0.95)
-  );
-  backdrop-filter: blur(10px);
-  border: 1px solid oklch(0.2 0.05 240);
-  transition: all 0.3s ease;
-}
-
-.alert-item:hover {
+.metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px oklch(0 0 0 / 0.3);
 }
 
-.alert-critical {
-  border-color: oklch(0.6 0.25 25 / 0.5);
+/* Enhanced evidence package styling */
+.evidence-package {
   background: linear-gradient(135deg, 
-    oklch(0.6 0.25 25 / 0.1), 
-    oklch(0.08 0.02 240 / 0.9)
+    oklch(0.68 0.3 300 / 0.1), 
+    oklch(0.78 0.25 145 / 0.1)
   );
-  box-shadow: 0 0 20px oklch(0.6 0.25 25 / 0.2);
+  border: 1px solid oklch(0.68 0.3 300 / 0.3);
 }
 
-.alert-warning {
-  border-color: oklch(0.7 0.15 60 / 0.5);
+.prosecution-ready {
   background: linear-gradient(135deg, 
-    oklch(0.7 0.15 60 / 0.1), 
-    oklch(0.08 0.02 240 / 0.9)
+    oklch(0.55 0.3 25 / 0.2), 
+    oklch(0.62 0.25 25 / 0.1)
   );
+  border: 1px solid oklch(0.55 0.3 25 / 0.3);
+  box-shadow: 0 0 20px oklch(0.55 0.3 25 / 0.2);
 }
 
-.alert-success {
-  border-color: oklch(0.75 0.25 145 / 0.5);
-  background: linear-gradient(135deg, 
-    oklch(0.75 0.25 145 / 0.1), 
-    oklch(0.08 0.02 240 / 0.9)
-  );
+/* Enhanced animations */
+@keyframes terminator-pulse {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 15px oklch(0.55 0.3 25 / 0.3);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 30px oklch(0.55 0.3 25 / 0.5);
+  }
 }
 
-.alert-info {
-  border-color: oklch(0.7 0.2 200 / 0.5);
-  background: linear-gradient(135deg, 
-    oklch(0.7 0.2 200 / 0.1), 
-    oklch(0.08 0.02 240 / 0.9)
-  );
+.terminator-pulse {
+  animation: terminator-pulse 2s infinite;
 }
 
-/* Command Palette Styling */
-.command-palette-overlay {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+@keyframes legal-harvest {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
-.command-palette-content {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.95), 
-    oklch(0.12 0.02 240 / 0.95)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-  box-shadow: 0 20px 40px oklch(0 0 0 / 0.5);
+.legal-harvest-animation {
+  animation: legal-harvest 3s ease-in-out infinite;
 }
 
-.command-item {
-  transition: all 0.15s ease;
+/* Enhanced matrix background */
+.matrix-bg {
+  background-image: 
+    radial-gradient(circle at 20% 20%, oklch(0.78 0.25 145 / 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, oklch(0.68 0.3 300 / 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, oklch(0.55 0.3 25 / 0.05) 1px, transparent 1px);
+  background-size: 50px 50px, 75px 75px, 100px 100px;
+  animation: matrix-flow 30s linear infinite;
 }
 
-.command-item:hover {
-  background: linear-gradient(135deg, 
-    oklch(0.15 0.03 240), 
-    oklch(0.12 0.02 240)
-  );
-  transform: translateY(-1px);
+@keyframes matrix-flow {
+  0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  100% { background-position: 100% 100%, -100% -100%, 50% 50%; }
 }
 
-.command-item-selected {
-  background: linear-gradient(135deg, 
-    oklch(0.2 0.05 240), 
-    oklch(0.15 0.03 240)
-  );
-  border: 1px solid oklch(0.75 0.25 145 / 0.3);
-  box-shadow: 0 0 20px oklch(0.75 0.25 145 / 0.1);
-}
-
-.command-shortcut {
-  background: oklch(0.05 0 0);
-  border: 1px solid oklch(0.2 0.05 240);
-  font-family: 'Courier Prime', monospace;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-.command-category-analysis { color: oklch(0.75 0.25 145); }
-.command-category-export { color: oklch(0.65 0.3 300); }
-.command-category-system { color: oklch(0.7 0.2 200); }
-.command-category-view { color: oklch(0.7 0.15 60); }
-.command-category-training { color: oklch(0.7 0.15 30); }
-
-.command-trigger-hint {
-  background: linear-gradient(135deg, 
-    oklch(0.08 0.02 240 / 0.9), 
-    oklch(0.12 0.02 240 / 0.9)
-  );
-  border: 1px solid oklch(0.2 0.05 240);
-  backdrop-filter: blur(10px);
+/* Enhanced button styling */
+.btn-enhanced {
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.command-trigger-hint:hover {
-  border-color: oklch(0.75 0.25 145 / 0.5);
-  box-shadow: 0 0 15px oklch(0.75 0.25 145 / 0.2);
-  transform: translateY(-1px);
+.btn-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, oklch(0.78 0.25 145 / 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
-.command-search-input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: oklch(0.9 0.05 145);
-  font-size: 14px;
+.btn-enhanced:hover::before {
+  left: 100%;
 }
 
-.command-search-input::placeholder {
-  color: oklch(0.5 0.05 145);
+/* Enhanced status bar */
+.status-bar {
+  background: linear-gradient(90deg, 
+    oklch(0.03 0 0 / 0.9), 
+    oklch(0.06 0.02 240 / 0.9), 
+    oklch(0.03 0 0 / 0.9)
+  );
+  backdrop-filter: blur(20px);
+  border-top: 1px solid oklch(0.78 0.25 145 / 0.3);
 }
 
-.command-badge-running {
-  background: oklch(0.7 0.15 60 / 0.2);
-  color: oklch(0.7 0.15 60);
-  border: 1px solid oklch(0.7 0.15 60 / 0.5);
-  animation: pulse 2s infinite;
+/* Enhanced loading states */
+.loading-enhanced {
+  background: linear-gradient(90deg, 
+    oklch(0.08 0.02 240) 0%, 
+    oklch(0.12 0.02 240) 50%, 
+    oklch(0.08 0.02 240) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 2s infinite ease-in-out;
 }
 
-.command-badge-criminal {
-  background: oklch(0.6 0.25 25 / 0.2);
-  color: oklch(0.6 0.25 25);
-  border: 1px solid oklch(0.6 0.25 25 / 0.5);
+@keyframes loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-.command-badge-active {
-  background: oklch(0.75 0.25 145 / 0.2);
-  color: oklch(0.75 0.25 145);
-  border: 1px solid oklch(0.75 0.25 145 / 0.5);
+/* Enhanced system initialization */
+.system-init {
+  background: linear-gradient(45deg, 
+    oklch(0.78 0.25 145 / 0.1), 
+    oklch(0.68 0.3 300 / 0.1), 
+    oklch(0.55 0.3 25 / 0.1)
+  );
+  background-size: 300% 300%;
+  animation: system-init-flow 4s ease-in-out infinite;
 }
 
-.command-badge-destructive {
-  background: oklch(0.6 0.25 25 / 0.2);
-  color: oklch(0.6 0.25 25);
-  border: 1px solid oklch(0.6 0.25 25 / 0.5);
+@keyframes system-init-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-/* Sophisticated coordination indicators */
-.coordination-indicator-high {
-  color: oklch(0.6 0.25 25);
-  background: oklch(0.6 0.25 25 / 0.1);
+/* Enhanced document upload zones */
+.upload-zone-sec {
+  border-color: oklch(0.78 0.25 145 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.78 0.25 145 / 0.05), 
+    oklch(0.06 0.02 240 / 0.8)
+  );
 }
 
-.coordination-indicator-medium {
-  color: oklch(0.7 0.15 60);
-  background: oklch(0.7 0.15 60 / 0.1);
+.upload-zone-public {
+  border-color: oklch(0.68 0.3 300 / 0.5);
+  background: linear-gradient(135deg, 
+    oklch(0.68 0.3 300 / 0.05), 
+    oklch(0.06 0.02 240 / 0.8)
+  );
 }
 
-.coordination-indicator-low {
-  color: oklch(0.75 0.25 145);
-  background: oklch(0.75 0.25 145 / 0.1);
+/* Enhanced legal citation styling */
+.legal-citation {
+  background: linear-gradient(135deg, 
+    oklch(0.68 0.3 300 / 0.1), 
+    oklch(0.78 0.25 145 / 0.1)
+  );
+  border-left: 3px solid oklch(0.68 0.3 300);
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+/* Enhanced evidence trail styling */
+.evidence-trail {
+  background: linear-gradient(135deg, 
+    oklch(0.06 0.02 240 / 0.9), 
+    oklch(0.10 0.02 240 / 0.9)
+  );
+  border: 1px solid oklch(0.18 0.05 240);
+  border-radius: 0.375rem;
+}
+
+.evidence-item {
+  position: relative;
+  padding-left: 1rem;
+  color: oklch(0.65 0.05 145);
+}
+
+.evidence-item::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: oklch(0.68 0.3 300);
+  font-weight: bold;
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+  .matrix-bg {
+    background-size: 25px 25px, 35px 35px, 45px 45px;
+  }
+  
+  .upload-zone {
+    padding: 1rem;
+  }
+  
+  .metric-card {
+    padding: 0.75rem;
+  }
 }
