@@ -25,7 +25,8 @@ The application will open automatically in your browser at `http://localhost:517
 
 ## 📖 Documentation
 
-- **[Local Development Guide](LOCAL_DEVELOPMENT.md)** - Simple, no-pipeline local development
+- **[Quick Start Guide](QUICK_START.md)** - Get running in 30 seconds!
+- **[Local Development Guide](LOCAL_DEVELOPMENT.md)** - Detailed local development instructions
 - **[Deployment Guide](DEPLOYMENT.md)** - Advanced deployment options (optional)
 
 ## ✨ Features
