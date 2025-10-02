@@ -151,7 +151,8 @@ class NITSPipelineOrchestrator:
                         },
                         {
                             'name': 'Upload Build Artifacts',
-                            'uses': 'actions/upload-artifact@v3',
+                            # Updated to v4 due to v3 deprecation (see: https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/)
+                            'uses': 'actions/upload-artifact@v4',
                             'with': {
                                 'name': 'nits-build-${{ github.sha }}',
                                 'path': 'dist/',
@@ -173,7 +174,8 @@ class NITSPipelineOrchestrator:
                         },
                         {
                             'name': 'Download Build Artifacts',
-                            'uses': 'actions/download-artifact@v3',
+                            # Updated to v4 due to v3 deprecation (see: https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/)
+                            'uses': 'actions/download-artifact@v4',
                             'with': {
                                 'name': 'nits-build-${{ github.sha }}',
                                 'path': 'dist/'
@@ -198,7 +200,8 @@ class NITSPipelineOrchestrator:
                         },
                         {
                             'name': 'Download Build Artifacts',
-                            'uses': 'actions/download-artifact@v3',
+                            # Updated to v4 due to v3 deprecation (see: https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/)
+                            'uses': 'actions/download-artifact@v4',
                             'with': {
                                 'name': 'nits-build-${{ github.sha }}',
                                 'path': 'dist/'

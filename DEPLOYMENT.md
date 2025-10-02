@@ -302,11 +302,13 @@ jobs:
       - uses: actions/setup-python@v4
       - name: Build NITS System (Pipeline)
         run: python rdl_deployment_pipeline.py --environment development
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nits-build-${{ github.sha }}
           path: dist/
 ```
+
+> **Note**: As of April 2024, only v4+ of the artifact actions are supported. See: https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/
 
 ### Environment-Specific Deployment
 
