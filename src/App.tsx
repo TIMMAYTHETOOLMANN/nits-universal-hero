@@ -246,6 +246,11 @@ function App() {
   
   const [isTerminatorMode, setIsTerminatorMode] = useState(false)
   const [govAPIStatus, setGovAPIStatus] = useState<'INITIALIZING' | 'CONNECTED' | 'ERROR'>('INITIALIZING')
+  
+  // Unified Terminator System
+  const [unifiedTerminator, setUnifiedTerminator] = useState<UnifiedTerminatorController | null>(null)
+  const [terminatorStatus, setTerminatorStatus] = useState<'LOADING' | 'READY' | 'ERROR'>('LOADING')
+  const [unifiedAnalysisResults, setUnifiedAnalysisResults] = useState<any>(null)
 
   const secFileInputRef = useRef<HTMLInputElement>(null)
   const publicFileInputRef = useRef<HTMLInputElement>(null)
@@ -859,6 +864,67 @@ function App() {
                         {legalAnalyzer ? 'ACTIVE' : 'LOADING'}
                       </Badge>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Company Analysis - Unified Terminator */}
+              <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-red-400 text-sm flex items-center gap-2">
+                    <Gavel className="w-4 h-4" />
+                    🎯 Company Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-xs text-gray-400 mb-2">SEC Company Termination</h4>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Enter CIK or Ticker Symbol"
+                          className="flex-1 px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded text-sm"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              analyzeCompany(e.currentTarget.value);
+                            }
+                          }}
+                        />
+                        <Button
+                          onClick={() => {
+                            const input = document.querySelector('input[placeholder="Enter CIK or Ticker Symbol"]') as HTMLInputElement;
+                            if (input?.value) analyzeCompany(input.value);
+                          }}
+                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                          disabled={terminatorStatus !== 'READY'}
+                        >
+                          TERMINATE
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Analyze SEC filings for violations</p>
+                    </div>
+                    
+                    {/* Quick Analysis for Uploaded Files */}
+                    {(uploadedFiles.sec.length > 0 || uploadedFiles.public.length > 0) && (
+                      <div>
+                        <h4 className="text-xs text-gray-400 mb-2">Unified Document Analysis</h4>
+                        <Button
+                          onClick={() => {
+                            // Analyze first uploaded file with unified terminator
+                            const firstFile = uploadedFiles.sec.length > 0 
+                              ? secFileInputRef.current?.files?.[0] 
+                              : publicFileInputRef.current?.files?.[0];
+                            if (firstFile) analyzeDocument(firstFile);
+                          }}
+                          className="w-full bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 text-sm"
+                          disabled={terminatorStatus !== 'READY' || isAnalyzing}
+                        >
+                          <Skull className="w-4 h-4 mr-2" />
+                          UNIFIED TERMINATE
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
