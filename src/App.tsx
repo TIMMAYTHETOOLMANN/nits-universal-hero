@@ -27,6 +27,7 @@ import {
 import { toast } from 'sonner'
 import { ErrorFallback } from './ErrorFallback'
 import { initializeTerminator, TerminatorAnalysisEngine } from './lib/govinfo-terminator'
+import { initializeUnifiedTerminator, UnifiedTerminatorController } from './lib/unified-terminator-controller'
 
 // Helper Components
 const StatusIndicator: React.FC<{ label: string; status: string; isActive: boolean }> = ({ label, status, isActive }) => (
@@ -188,6 +189,11 @@ function App() {
   const [terminatorEngine, setTerminatorEngine] = useState<TerminatorAnalysisEngine | null>(null)
   const [isTerminatorMode, setIsTerminatorMode] = useState(false)
   const [govAPIStatus, setGovAPIStatus] = useState<'INITIALIZING' | 'CONNECTED' | 'ERROR'>('INITIALIZING')
+  
+  // Unified Terminator System
+  const [unifiedTerminator, setUnifiedTerminator] = useState<UnifiedTerminatorController | null>(null)
+  const [terminatorStatus, setTerminatorStatus] = useState<'LOADING' | 'READY' | 'ERROR'>('LOADING')
+  const [unifiedAnalysisResults, setUnifiedAnalysisResults] = useState<any>(null)
 
   const secFileInputRef = useRef<HTMLInputElement>(null)
   const publicFileInputRef = useRef<HTMLInputElement>(null)
@@ -206,7 +212,25 @@ function App() {
         toast.error('Terminator initialization failed');
       }
     };
+
+    const initUnifiedTerminator = async () => {
+      try {
+        console.log('🔴 Initializing Unified Terminator System...');
+        const controller = await initializeUnifiedTerminator();
+        setUnifiedTerminator(controller);
+        setTerminatorStatus('READY');
+        console.log('✅ UNIFIED TERMINATOR SYSTEM ONLINE');
+        toast.success('Unified Terminator System Ready');
+      } catch (error) {
+        console.error('❌ Unified Terminator initialization failed:', error);
+        setTerminatorStatus('ERROR');
+        toast.error('Unified Terminator initialization failed');
+      }
+    };
+
+    // Initialize both systems
     initTerminator();
+    initUnifiedTerminator();
   }, []);
 
   // Handle file uploads - REAL functionality
@@ -234,6 +258,58 @@ function App() {
 
     toast.success(`${files.length} ${type.toUpperCase()} document${files.length !== 1 ? 's' : ''} uploaded successfully`)
   }, [])
+
+  // Unified document analysis function
+  const analyzeDocument = async (file: File) => {
+    if (!unifiedTerminator || terminatorStatus !== 'READY') {
+      toast.error('Unified Terminator not ready');
+      return;
+    }
+
+    try {
+      console.log(`🎯 Beginning unified analysis of ${file.name}`);
+      setIsAnalyzing(true);
+      const results = await unifiedTerminator.terminateDocument(file);
+      setUnifiedAnalysisResults(results);
+      
+      console.log('📊 UNIFIED ANALYSIS COMPLETE:', results);
+      
+      if (results.riskScore > 75) {
+        console.log('🚨 HIGH RISK DETECTED - RECOMMEND IMMEDIATE ACTION');
+        toast.error(`HIGH RISK: ${results.totalViolations} violations detected`);
+      } else {
+        toast.success(`Analysis complete: ${results.totalViolations} violations found`);
+      }
+    } catch (error) {
+      console.error('Unified analysis failed:', error);
+      toast.error('Analysis failed');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Company analysis function
+  const analyzeCompany = async (cikOrTicker: string) => {
+    if (!unifiedTerminator || terminatorStatus !== 'READY') {
+      toast.error('Unified Terminator not ready');
+      return;
+    }
+
+    try {
+      console.log(`🎯 Beginning company analysis: ${cikOrTicker}`);
+      setIsAnalyzing(true);
+      const results = await unifiedTerminator.terminateCompany(cikOrTicker);
+      setUnifiedAnalysisResults(results);
+      
+      console.log('📊 COMPANY ANALYSIS COMPLETE:', results);
+      toast.success(`Company analysis complete: ${results.totalViolations} violations found`);
+    } catch (error) {
+      console.error('Company analysis failed:', error);
+      toast.error(`Company analysis failed: ${error.message}`);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   // Real analysis function
   const startAnalysis = useCallback(async () => {
@@ -440,9 +516,9 @@ function App() {
           />
         </div>
 
-        {/* Terminator Status Badge - Fixed Position */}
-        {govAPIStatus === 'CONNECTED' && (
-          <div className="fixed top-4 right-4 z-50">
+        {/* Status Badges - Fixed Position */}
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+          {govAPIStatus === 'CONNECTED' && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -452,8 +528,26 @@ function App() {
                 🔴 TERMINATOR ACTIVE
               </Badge>
             </motion.div>
-          </div>
-        )}
+          )}
+          
+          {/* Unified Terminator Status */}
+          <Badge className={`${
+            terminatorStatus === 'READY' ? 'bg-green-600' : 
+            terminatorStatus === 'ERROR' ? 'bg-red-600' : 
+            'bg-yellow-600'
+          } text-white px-3 py-1 text-sm font-bold shadow-lg`}>
+            {terminatorStatus === 'READY' ? '🔴 UNIFIED TERMINATOR ONLINE' : 
+             terminatorStatus === 'ERROR' ? '❌ SYSTEM ERROR' : 
+             '⏳ LOADING...'}
+          </Badge>
+          
+          {/* Unified Analysis Results Badge */}
+          {unifiedAnalysisResults && (
+            <Badge className="bg-red-600 text-white animate-pulse px-3 py-1 text-sm font-bold shadow-lg">
+              {unifiedAnalysisResults.totalViolations} VIOLATIONS DETECTED
+            </Badge>
+          )}
+        </div>
 
         {/* HEADER - Shows REAL status */}
         <motion.header 
@@ -704,6 +798,67 @@ function App() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Company Analysis - Unified Terminator */}
+              <Card className="bg-gray-900/50 border-gray-800 backdrop-blur">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-red-400 text-sm flex items-center gap-2">
+                    <Gavel className="w-4 h-4" />
+                    🎯 Company Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-xs text-gray-400 mb-2">SEC Company Termination</h4>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Enter CIK or Ticker Symbol"
+                          className="flex-1 px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded text-sm"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              analyzeCompany(e.currentTarget.value);
+                            }
+                          }}
+                        />
+                        <Button
+                          onClick={() => {
+                            const input = document.querySelector('input[placeholder="Enter CIK or Ticker Symbol"]') as HTMLInputElement;
+                            if (input?.value) analyzeCompany(input.value);
+                          }}
+                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                          disabled={terminatorStatus !== 'READY'}
+                        >
+                          TERMINATE
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Analyze SEC filings for violations</p>
+                    </div>
+                    
+                    {/* Quick Analysis for Uploaded Files */}
+                    {(uploadedFiles.sec.length > 0 || uploadedFiles.public.length > 0) && (
+                      <div>
+                        <h4 className="text-xs text-gray-400 mb-2">Unified Document Analysis</h4>
+                        <Button
+                          onClick={() => {
+                            // Analyze first uploaded file with unified terminator
+                            const firstFile = uploadedFiles.sec.length > 0 
+                              ? secFileInputRef.current?.files?.[0] 
+                              : publicFileInputRef.current?.files?.[0];
+                            if (firstFile) analyzeDocument(firstFile);
+                          }}
+                          className="w-full bg-red-600/20 border-red-600/50 text-red-400 hover:bg-red-600/30 text-sm"
+                          disabled={terminatorStatus !== 'READY' || isAnalyzing}
+                        >
+                          <Skull className="w-4 h-4 mr-2" />
+                          UNIFIED TERMINATE
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
