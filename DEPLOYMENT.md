@@ -1,5 +1,10 @@
 # NITS Universal Forensic Intelligence System - Deployment Guide
 
+> **📝 Note:** This guide covers **advanced deployment options** for CI/CD pipelines and automated deployments.
+> 
+> **For simple local development**, see [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md) instead.
+> Just run `./local-dev.sh` or `npm run dev` to get started!
+
 ## Overview
 
 The NITS deployment system provides two complementary scripts for different deployment scenarios:
@@ -8,6 +13,8 @@ The NITS deployment system provides two complementary scripts for different depl
 2. **`rdl_deployment_pipeline.py`** - CI/CD pipeline orchestration for automated deployments
 
 Both scripts integrate seamlessly to provide comprehensive deployment capabilities for the NITS Universal Forensic Intelligence System v2.0 (AI-Enhanced).
+
+**⚠️ These advanced scripts are optional** - you can develop and build locally without them.
 
 ## Pipeline Deployment (Recommended)
 
