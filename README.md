@@ -7,8 +7,11 @@ A comprehensive AI-Enhanced forensic intelligence system built with React, TypeS
 **The simplest way to get started:**
 
 ```bash
-# Start the development server
+# Linux/Mac
 ./local-dev.sh
+
+# Windows
+local-dev.bat
 ```
 
 Or using npm directly:
@@ -42,8 +45,8 @@ The application will open automatically in your browser at `http://localhost:517
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build |
 | `npm run lint` | Check code quality |
-| `./local-dev.sh` | Quick start (recommended) |
-| `./local-build.sh` | Build and preview |
+| `./local-dev.sh` or `local-dev.bat` | Quick start (recommended) |
+| `./local-build.sh` or `local-build.bat` | Build and preview |
 
 ## 📋 Requirements
 

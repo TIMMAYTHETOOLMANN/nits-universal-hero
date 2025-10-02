@@ -6,9 +6,16 @@ This guide provides simple, straightforward instructions for running the NITS Un
 
 ### Option 1: Using Simple Scripts (Recommended)
 
+**Linux/Mac:**
 ```bash
 # Start development server
 ./local-dev.sh
+```
+
+**Windows:**
+```cmd
+# Start development server
+local-dev.bat
 ```
 
 That's it! The development server will start and open in your browser automatically.
@@ -29,9 +36,19 @@ The application will be available at `http://localhost:5173` (or another port if
 
 ### Using the Simple Script
 
+**Linux/Mac:**
 ```bash
 # Build the application
 ./local-build.sh
+
+# Preview the production build
+npm run preview
+```
+
+**Windows:**
+```cmd
+# Build the application
+local-build.bat
 
 # Preview the production build
 npm run preview
@@ -72,8 +89,10 @@ npm --version
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run linter to check code quality |
-| `./local-dev.sh` | Quick start development (script) |
-| `./local-build.sh` | Build and preview (script) |
+| `./local-dev.sh` (Linux/Mac) | Quick start development (script) |
+| `local-dev.bat` (Windows) | Quick start development (script) |
+| `./local-build.sh` (Linux/Mac) | Build and preview (script) |
+| `local-build.bat` (Windows) | Build and preview (script) |
 
 ## Development Workflow
 
@@ -85,8 +104,10 @@ npm --version
 2. **Daily development:**
    ```bash
    npm run dev
-   # or
+   # or (Linux/Mac)
    ./local-dev.sh
+   # or (Windows)
+   local-dev.bat
    ```
 
 3. **Before deploying:**
