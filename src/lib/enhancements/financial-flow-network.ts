@@ -465,5 +465,3 @@ export class FinancialFlowNetworkAnalyzer {
     return recommendations;
   }
 }
-
-export { FinancialFlowNetworkAnalyzer };

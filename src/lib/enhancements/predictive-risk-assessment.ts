@@ -840,5 +840,3 @@ export class PredictiveRiskAssessmentEngine {
     this.alertThresholds.set('LOW_RISK', 20);
   }
 }
-
-export { PredictiveRiskAssessmentEngine };

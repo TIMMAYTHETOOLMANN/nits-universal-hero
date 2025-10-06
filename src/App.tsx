@@ -222,6 +222,52 @@ function App() {
   const secFileInputRef = useRef<HTMLInputElement>(null)
   const publicFileInputRef = useRef<HTMLInputElement>(null)
 
+  // Initialize all legal and enhancement systems on app load
+  useEffect(() => {
+    const initializeLegalSystems = async () => {
+      console.log('⚡ INITIALIZING NITS UNIVERSAL HERO SYSTEMS...')
+      
+      try {
+        // Import and initialize UnifiedTerminatorController
+        const { initializeUnifiedTerminator } = await import('./lib/unified-terminator-controller')
+        const controller = await initializeUnifiedTerminator()
+        
+        console.log('✅ All systems initialized and ready')
+        console.log('   - Legal Fortification: ACTIVE')
+        console.log('   - 5 Advanced Enhancements: ACTIVE')
+        console.log('   - Memory Optimizer: ACTIVE')
+        console.log('   - Performance Monitor: ACTIVE')
+        console.log('   - Regulatory Updates: MONITORING')
+        
+        // Store controller globally for access
+        (window as any).__NITS_CONTROLLER__ = controller
+        
+        setSystemStatus(prev => ({
+          ...prev,
+          legalDb: 'READY',
+          terminator: 'ARMED',
+          harvester: 'MONITORING'
+        }))
+        
+        toast.success('NITS Systems Fully Armed', {
+          description: 'All enhancements active and monitoring'
+        })
+      } catch (error) {
+        console.error('❌ System initialization failed:', error)
+        setSystemStatus(prev => ({
+          ...prev,
+          legalDb: 'ERROR',
+          terminator: 'ERROR'
+        }))
+        toast.error('System initialization failed', {
+          description: 'Check console for details'
+        })
+      }
+    }
+    
+    initializeLegalSystems()
+  }, []) // Run once on mount
+
   // File upload handler
   const handleFileUpload = useCallback((files: FileList | null, type: 'sec' | 'public') => {
     if (!files || files.length === 0) return

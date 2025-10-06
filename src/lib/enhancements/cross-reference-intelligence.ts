@@ -664,5 +664,3 @@ export class CrossReferenceIntelligenceSystem {
     return recommendations;
   }
 }
-
-export { CrossReferenceIntelligenceSystem };

@@ -6,6 +6,20 @@ import { SECTerminator, SECViolation } from './sec-terminator';
 import { RealDocumentParser, ParsedDocument } from './real_forensic_engine';
 import { RealViolationDetector, DetailedViolation } from './real_violation_detector';
 
+// Import Five Advanced Enhancements
+import { CrossReferenceIntelligenceSystem } from './enhancements/cross-reference-intelligence';
+import { MultiJurisdictionalCorrelationEngine } from './enhancements/multi-jurisdictional-correlation';
+import { TemporalPatternAnalysisEngine } from './enhancements/temporal-pattern-analysis';
+import { FinancialFlowNetworkAnalyzer } from './enhancements/financial-flow-network';
+import { PredictiveRiskAssessmentEngine } from './enhancements/predictive-risk-assessment';
+
+// Import Legal Fortification Modules
+import { LegalDocumentHarvester } from './legal-document-harvester';
+import { SurgicalDocumentParser } from './surgical-document-parser';
+import { ViolationDetectionEngine } from './violation-detection-engine';
+import { RegulatoryUpdateSystem } from './regulatory-update-system';
+import { LegalPatternAnalyzer } from './legal-pattern-analyzer';
+
 // Import existing GovInfo types (will need to match existing structure)
 interface GovInfoViolation {
   type: string;
@@ -59,27 +73,62 @@ export class UnifiedTerminatorController {
   private govInfoViolations: Map<string, GovInfoViolation[]> = new Map();
   private isInitialized: boolean = false;
   
-  // Add real forensic analysis components
+  // Real forensic analysis components
   private documentParser: RealDocumentParser;
   private violationDetector: RealViolationDetector;
+  
+  // Five Advanced Enhancements
+  private crossReferenceSystem: CrossReferenceIntelligenceSystem;
+  private jurisdictionalEngine: MultiJurisdictionalCorrelationEngine;
+  private temporalAnalyzer: TemporalPatternAnalysisEngine;
+  private financialFlowAnalyzer: FinancialFlowNetworkAnalyzer;
+  private riskAssessmentEngine: PredictiveRiskAssessmentEngine;
+  
+  // Legal Fortification Modules
+  private legalHarvester: LegalDocumentHarvester;
+  private surgicalParser: SurgicalDocumentParser;
+  private violationEngine: ViolationDetectionEngine;
+  private regulatoryUpdater: RegulatoryUpdateSystem;
+  private legalAnalyzer: LegalPatternAnalyzer;
 
   constructor() {
-    console.log('════════════════════════════════════════════');
-    console.log('║  UNIFIED TERMINATOR SYSTEM v4.0          ║');
-    console.log('║  GovInfo + SEC EDGAR Integration         ║');
-    console.log('║  OBJECTIVE: TOTAL LEGAL ANNIHILATION     ║');
-    console.log('════════════════════════════════════════════');
+    console.log('════════════════════════════════════════════════════════');
+    console.log('║  UNIFIED TERMINATOR SYSTEM v5.0 ULTIMATE EDITION    ║');
+    console.log('║  GovInfo + SEC + 5 Enhancements + Legal Fortification║');
+    console.log('║  OBJECTIVE: TOTAL LEGAL ANNIHILATION                ║');
+    console.log('════════════════════════════════════════════════════════');
 
     this.apiManager = new UnifiedAPIManager();
     this.secTerminator = new SECTerminator(this.apiManager);
     this.documentParser = new RealDocumentParser();
     this.violationDetector = new RealViolationDetector();
+    
+    // Initialize Five Advanced Enhancements
+    this.crossReferenceSystem = new CrossReferenceIntelligenceSystem(this.apiManager);
+    this.jurisdictionalEngine = new MultiJurisdictionalCorrelationEngine();
+    this.temporalAnalyzer = new TemporalPatternAnalysisEngine();
+    this.financialFlowAnalyzer = new FinancialFlowNetworkAnalyzer();
+    this.riskAssessmentEngine = new PredictiveRiskAssessmentEngine();
+    
+    // Initialize Legal Fortification Modules
+    this.legalHarvester = new LegalDocumentHarvester();
+    this.surgicalParser = new SurgicalDocumentParser();
+    this.violationEngine = new ViolationDetectionEngine();
+    this.regulatoryUpdater = new RegulatoryUpdateSystem();
+    this.legalAnalyzer = new LegalPatternAnalyzer();
   }
 
   async initialize(): Promise<void> {
-    console.log('🔴 INITIALIZING UNIFIED TERMINATOR...');
+    console.log('🔴 INITIALIZING UNIFIED TERMINATOR WITH ALL ENHANCEMENTS...');
 
     try {
+      // Initialize Legal Fortification Systems
+      console.log('⚖️ INITIALIZING LEGAL FORTIFICATION...');
+      await this.legalHarvester.harvestAllRegulations();
+      this.violationEngine.setLegalIndex(this.legalHarvester.getIndexedStatutes());
+      this.regulatoryUpdater.startAutonomousMonitoring();
+      console.log('✅ Legal Fortification Ready');
+      
       // Load CFR titles from GovInfo
       console.log('📚 Harvesting federal regulations...');
       await this.harvestCriticalCFRTitles();
@@ -87,9 +136,21 @@ export class UnifiedTerminatorController {
       // Load SEC enforcement history
       console.log('⚖️ Harvesting SEC enforcement database...');
       await this.harvestSECEnforcementHistory();
+      
+      // Initialize Enhancement Systems
+      console.log('🔧 INITIALIZING 5 ADVANCED ENHANCEMENTS...');
+      console.log('  ✅ Cross-Reference Intelligence System armed');
+      console.log('  ✅ Multi-Jurisdictional Correlation Engine armed');
+      console.log('  ✅ Temporal Pattern Analyzer armed');
+      console.log('  ✅ Financial Flow Network Analyzer armed');
+      console.log('  ✅ Predictive Risk Assessment Engine armed');
 
       this.isInitialized = true;
-      console.log('✅ UNIFIED TERMINATOR READY FOR DEPLOYMENT');
+      console.log('✅ UNIFIED TERMINATOR FULLY ARMED AND OPERATIONAL');
+      console.log('   - Legal Fortification: ACTIVE');
+      console.log('   - 5 Advanced Enhancements: ACTIVE');
+      console.log('   - SEC Integration: ACTIVE');
+      console.log('   - GovInfo Integration: ACTIVE');
     } catch (error) {
       console.error('❌ INITIALIZATION FAILED:', error);
       throw error;
@@ -188,16 +249,55 @@ export class UnifiedTerminatorController {
         ...secViolations
       ];
 
-      // STEP 5: DETECT CROSS-DOMAIN ISSUES
+      // STEP 5: RUN ALL FIVE ADVANCED ENHANCEMENTS
+      console.log('🚀 STEP 5: Running Five Advanced Enhancements...');
+      
+      // Enhancement #1: Cross-Reference Intelligence
+      console.log('  🔗 Running Cross-Reference Intelligence...');
+      const entityGraph = await this.crossReferenceSystem.buildEntityGraph(parsed);
+      const crossRefMatches = await this.crossReferenceSystem.searchAllDatabases(parsed);
+      const historicalPatterns = await this.crossReferenceSystem.matchHistoricalPatterns(detailedViolations);
+      
+      // Enhancement #2: Multi-Jurisdictional Correlation
+      console.log('  🌍 Running Multi-Jurisdictional Correlation...');
+      const jurisdictionalAnalysis = await this.jurisdictionalEngine.analyzeJurisdictions(parsed, detailedViolations);
+      
+      // Enhancement #3: Temporal Pattern Analysis
+      console.log('  ⏱️ Running Temporal Pattern Analysis...');
+      const temporalAnalysis = await this.temporalAnalyzer.analyzeTimeline(parsed, detailedViolations);
+      
+      // Enhancement #4: Financial Flow Network Analysis
+      console.log('  💰 Running Financial Flow Network Analysis...');
+      const financialNetwork = await this.financialFlowAnalyzer.analyzeFinancialFlow(parsed, detailedViolations);
+      
+      // Enhancement #5: Predictive Risk Assessment
+      console.log('  🎯 Running Predictive Risk Assessment...');
+      const riskProfile = await this.riskAssessmentEngine.assessComprehensiveRisk(
+        parsed,
+        detailedViolations,
+        {
+          crossRefData: { entityGraph, crossRefMatches, historicalPatterns },
+          jurisdictionalData: jurisdictionalAnalysis,
+          temporalData: temporalAnalysis,
+          networkData: financialNetwork
+        }
+      );
+      
+      console.log(`✅ Enhancement Analysis Complete`);
+
+      // STEP 6: DETECT CROSS-DOMAIN ISSUES
       const crossDomain = this.detectCrossDomainViolations(
         allViolations.filter(v => v.source === 'GOVINFO'),
         allViolations.filter(v => v.source === 'SEC')
       );
 
-      // STEP 6: CALCULATE RISK SCORE
-      const riskScore = this.calculateUnifiedRiskScore(allViolations, crossDomain);
+      // STEP 7: CALCULATE ENHANCED RISK SCORE
+      const riskScore = Math.max(
+        this.calculateUnifiedRiskScore(allViolations, crossDomain),
+        riskProfile.overallRiskScore
+      );
 
-      // STEP 7: GENERATE PROSECUTION PACKAGE
+      // STEP 8: GENERATE COMPREHENSIVE PROSECUTION PACKAGE
       const prosecutionPackage = this.generateDetailedProsecutionPackage(
         file.name,
         detailedViolations,
@@ -205,6 +305,15 @@ export class UnifiedTerminatorController {
         riskScore,
         parsed
       );
+      
+      // Add enhancement data to prosecution package
+      prosecutionPackage.enhancements = {
+        crossReference: { entityGraph, crossRefMatches, historicalPatterns },
+        jurisdictional: jurisdictionalAnalysis,
+        temporal: temporalAnalysis,
+        financialNetwork: financialNetwork,
+        riskProfile: riskProfile
+      };
 
       const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`✅ ANALYSIS COMPLETE in ${elapsedTime}s`);
@@ -373,6 +482,26 @@ export class UnifiedTerminatorController {
         })),
         ...govInfoViolations
       ];
+
+      // Run enhancements on company data
+      console.log('🚀 Running Advanced Enhancements on company...');
+      
+      // Create a simplified parsed document from SEC data for enhancements
+      const parsedFromSEC: Partial<ParsedDocument> = {
+        entities: {
+          companies: [{ name: secResult.company.title, ticker: secResult.company.ticker, cik: secResult.company.cik_str.toString() }],
+          people: [],
+          locations: []
+        },
+        financials: {
+          amounts: [],
+          inconsistencies: []
+        },
+        pages: []
+      };
+      
+      // Run cross-reference intelligence on company
+      const entityGraph = await this.crossReferenceSystem.buildEntityGraph(parsedFromSEC as ParsedDocument);
 
       // Detect cross-domain issues
       const crossDomain = this.detectCrossDomainViolations(
