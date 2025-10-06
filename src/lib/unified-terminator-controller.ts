@@ -9,7 +9,7 @@ import { RealViolationDetector, DetailedViolation } from './real_violation_detec
 // Import Five Advanced Enhancements
 import { CrossReferenceIntelligenceSystem } from './enhancements/cross-reference-intelligence';
 import { MultiJurisdictionalCorrelationEngine } from './enhancements/multi-jurisdictional-correlation';
-import { TemporalPatternAnalyzer } from './enhancements/temporal-pattern-analysis';
+import { TemporalPatternAnalysisEngine } from './enhancements/temporal-pattern-analysis';
 import { FinancialFlowNetworkAnalyzer } from './enhancements/financial-flow-network';
 import { PredictiveRiskAssessmentEngine } from './enhancements/predictive-risk-assessment';
 
@@ -80,7 +80,7 @@ export class UnifiedTerminatorController {
   // Five Advanced Enhancements
   private crossReferenceSystem: CrossReferenceIntelligenceSystem;
   private jurisdictionalEngine: MultiJurisdictionalCorrelationEngine;
-  private temporalAnalyzer: TemporalPatternAnalyzer;
+  private temporalAnalyzer: TemporalPatternAnalysisEngine;
   private financialFlowAnalyzer: FinancialFlowNetworkAnalyzer;
   private riskAssessmentEngine: PredictiveRiskAssessmentEngine;
   
@@ -106,7 +106,7 @@ export class UnifiedTerminatorController {
     // Initialize Five Advanced Enhancements
     this.crossReferenceSystem = new CrossReferenceIntelligenceSystem(this.apiManager);
     this.jurisdictionalEngine = new MultiJurisdictionalCorrelationEngine();
-    this.temporalAnalyzer = new TemporalPatternAnalyzer();
+    this.temporalAnalyzer = new TemporalPatternAnalysisEngine();
     this.financialFlowAnalyzer = new FinancialFlowNetworkAnalyzer();
     this.riskAssessmentEngine = new PredictiveRiskAssessmentEngine();
     

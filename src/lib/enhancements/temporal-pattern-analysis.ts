@@ -802,5 +802,3 @@ export class TemporalPatternAnalysisEngine {
     return recommendations;
   }
 }
-
-export { TemporalPatternAnalysisEngine };

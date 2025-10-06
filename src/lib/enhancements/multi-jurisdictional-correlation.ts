@@ -187,5 +187,3 @@ export class MultiJurisdictionalCorrelationEngine {
     });
   }
 }
-
-export { MultiJurisdictionalCorrelationEngine };
